@@ -10,12 +10,18 @@ ERRORSUM="0"
 ERRORCODE="0"
 
 if [ -f "$1" ] ; then
-#the first Parameter is a file so let's use this as text input.
-	MSGTEXT=$(cat $1)
+# "the first Parameter is a file so let's use this as text input."
+FILETYPE="$(file "$1")"
+	if [[ $FILETYPE == *"text" ]] || [[ $FILETYPE == *"text"*"long lines" ]]   ; then
+		# "is text"
+		MSGTEXT=$(cat $1)
+		# "truncate to maxsize. https://core.telegram.org/method/messages.sendMessage"
+		MSGTEXT=${MSGTEXT:1:4096}
+	else
+		# "file doesn't think it's text"
+		MSGTEXT="$EXECDAT: File: $*, but not text."
+	fi
 else
-#the first Parameter is not a file so just juse all as mesasge.
-	MSGTEXT="$EXECDAT: Message: $*"
-fi
 
 for USERID in `echo $USERIDS`
 do
