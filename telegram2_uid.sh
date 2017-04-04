@@ -22,6 +22,9 @@ FILETYPE="$(file "$1")"
 		MSGTEXT="$EXECDAT: File: $*, but not text."
 	fi
 else
+	#the first Parameter is not a file so just juse all as mesasge.
+	MSGTEXT="$EXECDAT: Message: $*"
+fi
 
 for USERID in `echo $USERIDS`
 do
