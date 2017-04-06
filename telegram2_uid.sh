@@ -1,6 +1,6 @@
 #!/bin/bash
-#Send telegram Messages to one or several USERID from Bot.
-#Text input via file or command line arguments
+# Send telegram Messages to one or several USERID from Bot.
+# Text input via file or command line arguments
 # Part of https://github.com/servidge/snowflakes
 USERIDS="<USERID> <USERID2> <USERID3>"
 APITOKEN="<TELEGRAMTOKEN>"
