@@ -5,7 +5,8 @@
 USERIDS="<USERID> <USERID2> <USERID3>"
 APITOKEN="<TELEGRAMTOKEN>"
 TIMEOUT="11"
-URL="https://api.telegram.org/bot$APITOKEN/sendMessage"
+URL="https://api.telegram.org/bot$APITOKEN"
+URLMESSAGE="$URL/sendMessage"
 EXECDAT="$(date "+%Y-%m-%d %H:%M")"
 ERRORSUM="0"
 ERRORCODE="0"
@@ -16,10 +17,10 @@ f_sendmessage () {
 TEXT="$1"
 for USERID in `echo $USERIDS`; do 
 	#Markdown interpretation of given text. 
-	curl -s --max-time $TIMEOUT \
+	curl -s --max-time $TIMEOUT $URLMESSAGE\
 		--data-urlencode "chat_id=$USERID&disable_web_page_preview=1" \
 		--data-urlencode "parse_mode=Markdown" \
-		--data-urlencode "text=${TEXT}" $URL > /dev/null
+		--data-urlencode "text=${TEXT}" > /dev/null
 	ERRORCODE=$?
 	ERRORSUM=$(($ERRORSUM+$ERRORCODE))
 done
@@ -27,7 +28,7 @@ done
 
 if [ -f "$1" ] ; then
 # "the first Parameter is a file so let's use this as text input."
-FILETYPE="$(file "$1")"
+FILETYPE="$(file -b "$1")"
 	if [[ $FILETYPE == *"text" ]] || [[ $FILETYPE == *"text"*"long lines" ]]; then
 		# "file think it's text"
 		MSGTEXT=$(cat $1)
