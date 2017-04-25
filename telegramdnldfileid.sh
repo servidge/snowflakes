@@ -1,3 +1,4 @@
+@@ -1,31 +0,0 @@
 #!/bin/bash
 # Download pictures // fileIDs that was sent to the bot.
 # input File ID via first command line argument
