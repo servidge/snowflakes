@@ -1,7 +1,6 @@
-@@ -1,31 +0,0 @@
 #!/bin/bash
 # Download pictures // fileIDs that was sent to the bot.
-# input File ID via first command line argument
+# input File ID via command line arguments (no check)
 # Part of https://github.com/servidge/snowflakes
 USERIDS="<USERID> <USERID2> <USERID3>"
 APITOKEN="<TELEGRAMTOKEN>"
@@ -14,19 +13,26 @@ EXECDAT="$(date "+%Y-%m-%d %H:%M")"
 ERRORSUM="0"
 ERRORCODE="0"
 
-FILEID="$1"
-# get file and path 
-GETPATH=$(curl -s $URLDNLDPATH"?file_id="$FILEID)
-if [[ "$GETPATH" =~ \"file_path\"\:\"(([a-zA-Z0-9/_]+))\" ]]; then
-	FILEPATH=${BASH_REMATCH[1]}
-else
-	exit 254
-fi
-
-# download path/file
-OUTPUTFILE=${FILEPATH////_-_}-$FILEID
-curl -o $DNLDDIR/$OUTPUTFILE -s --max-time $TIMEOUT $URLDNLDFILE/$FILEPATH > /dev/null
-ERRORCODE=$?
-ERRORSUM=$(($ERRORSUM+$ERRORCODE))
-# exit with curl errorcode sum
+for FILEID in "$@"; do 
+	# get file and path 
+	GETPATH=$(curl -s $URLDNLDPATH"?file_id="$FILEID)
+	ERRORCODE=$?
+	ERRORSUM=$(($ERRORSUM+$ERRORCODE))
+	if [[ "$GETPATH" =~ \"file_path\"\:\"(([a-zA-Z0-9/_]+))\" ]]; then
+		FILEPATH=${BASH_REMATCH[1]}
+		# download path/file
+		OUTPUTFILE=$FILEID-${FILEPATH////_-_}
+		curl -o $DNLDDIR/$OUTPUTFILE -s --max-time $TIMEOUT $URLDNLDFILE/$FILEPATH > /dev/null
+		ERRORCODE=$?
+		ERRORSUM=$(($ERRORSUM+$ERRORCODE))
+	elif [[ "$GETPATH" =~ \"error_code\"\:(([a-zA-Z0-9/_\"\ .:,]+)) ]]; then
+		ERROR=${BASH_REMATCH[1]}
+		echo "ERROR: FileID:$FILEID - $ERROR"
+		ERRORSUM=$(($ERRORSUM+50))
+	else
+		echo "ERROR: $GETPATH"
+		ERRORSUM=$(($ERRORSUM+111))
+	fi
+done
+# exit errorcode sum
 exit $ERRORSUM
