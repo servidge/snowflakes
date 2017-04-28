@@ -5,7 +5,7 @@
 ' Einen einfacheren Weg gibt es nicht. Siehe https://splash.riverbed.com/thread/2935 oder https://splash.riverbed.com/ideas/1226
 ' There is no better way to reset several connections. Siehe https://splash.riverbed.com/thread/2935 oder https://splash.riverbed.com/ideas/1226
 ' Part of https://github.com/servidge/snowflakes
-' Auswahl der Connections via logfile des "show connections passthrough" // Selection of the connections via logfile of the "show connections passthrough"
+' Auswahl der Connections via logfile des "show connections (passthrough)" // Selection of the connections via logfile of the "show connections (passthrough)"
 ' Quelle//Source:
 ' PI 10.10.10.10:11111       10.20.20.20:232       TCP         2015/02/17 17:42:53
 ' Ziel//Target:
@@ -29,21 +29,24 @@ if Management = "q" then wscript.quit
 
 Dim fso, f
 Set fso = CreateObject("Scripting.FileSystemObject")
-inputfile = crt.Dialog.FileOpenDialog("Inputdatei Auswählen", "Open", "RiOS-reset-connection-input.txt", "Text Files (*.txt)|*.txt||")
-inputfile="Z:\Autostart\CRT-Scripte\RiOS-reset-connection-input.txt" 'Old SecureCRT Version. before ~6.7
+'inputfile = crt.Dialog.FileOpenDialog("Inputdatei Auswählen", "Open", "RiOS-reset-connection-input.txt", "Text Files (*.txt)|*.txt||")
+inputfile="RiOS-reset-connection-input.txt" 'Old SecureCRT Version. before ~6.7
 Set f = fso.OpenTextFile(inputfile, ForReading, 0)
 
 Dim line, parameter 
 Do While f.AtEndOfStream <> True
 	line = f.Readline
+	line=LTrim(line)
 	line=Replace(line,":"," ")
 	Do Until InStr(line, "  ") = 0
 		line = Replace(line, "   ", " ")
 		line = Replace(line, "  ", " ")
 	Loop
-	parameter = Split( line )
-	crt.Screen.Send "tcp connection send pass-reset source-addr " & parameter(1) & " source-port " & parameter(2) & " dest-addr " & parameter(3) & " dest-port " & parameter(4) & vbCR 
-	crt.Screen.WaitForString management, 7
+	If Not(Left(LTrim(line),Len("O")) = "O") Then
+		parameter = Split( line )
+		crt.Screen.Send "tcp connection send pass-reset source-addr " & parameter(1) & " source-port " & parameter(2) & " dest-addr " & parameter(3) & " dest-port " & parameter(4) & vbCR 
+		crt.Screen.WaitForString management, 1
+	End If
 Loop
 crt.Dialog.MessageBox("ENDE")
 End Sub
