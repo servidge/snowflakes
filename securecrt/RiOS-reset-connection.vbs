@@ -9,15 +9,27 @@
 ' Quelle//Source:
 ' PI 10.10.10.10:11111       10.20.20.20:232       TCP         2015/02/17 17:42:53
 ' Ziel//Target:
-' tcp connection send pass-reset source-addr 10.10.10.10 source-port 11111 dest-addr 10.20.20.20 dest-port 232 
+' tcp connection send pass-reset source-addr 10.10.10.10 source-port 11111 dest-addr 10.20.20.20 dest-port 232
 
+'crt.Screen.Synchronous = True
+'crt.Screen.IgnoreEscape = True
 Const ForReading = 1
 Management1ask = "Bitte Loginprompt eingeben oder Vorschlag mit OK bestätigen"
 Userabort = " q   Script beenden "
 
+Sub reset(subline)
+	subline=Replace(subline,":"," ")
+	Do Until InStr(subline, "  ") = 0
+		subline = Replace(subline, "   ", " ")
+		subline = Replace(subline, "  ", " ")
+	Loop
+	parameter = Split( subline )
+	crt.Screen.Send "!tcp connection send pass-reset source-addr " & parameter(1) & " source-port " & parameter(2) & " dest-addr " & parameter(3) & " dest-port " & parameter(4) & vbCR
+	crt.Screen.WaitForString management, 1
+End Sub
+
 Sub main
 crt.Dialog.MessageBox("START")
-crt.Screen.Synchronous = false
 crt.Screen.Send " " & Chr(13)
 crt.Screen.Send "conf t" & vbCr
 crt.Screen.Send " " & Chr(13)
@@ -33,19 +45,22 @@ Set fso = CreateObject("Scripting.FileSystemObject")
 inputfile="RiOS-reset-connection-input.txt" 'Old SecureCRT Version. before ~6.7
 Set f = fso.OpenTextFile(inputfile, ForReading, 0)
 
-Dim line, parameter 
+Dim line, parameter
 Do While f.AtEndOfStream <> True
 	line = f.Readline
 	line=LTrim(line)
-	line=Replace(line,":"," ")
-	Do Until InStr(line, "  ") = 0
-		line = Replace(line, "   ", " ")
-		line = Replace(line, "  ", " ")
-	Loop
-	If Not(Left(LTrim(line),Len("O")) = "O") Then
-		parameter = Split( line )
-		crt.Screen.Send "tcp connection send pass-reset source-addr " & parameter(1) & " source-port " & parameter(2) & " dest-addr " & parameter(3) & " dest-port " & parameter(4) & vbCR 
-		crt.Screen.WaitForString management, 1
+	If (Left(line,Len("O")) = "O") Then
+	'reset(line)
+	Elseif (Left(line,Len("PI")) = "PI") Then
+	reset(line)
+	ElseIf (Left(line,Len("PU")) = "PU") Then
+	reset(line)
+	ElseIf (Left(line,Len("H")) = "H") Then
+	reset(line)
+	ElseIf (Left(line,Len("C")) = "C") Then
+	reset(line)
+	Else
+	'crt.Dialog.MessageBox("debug" + line)
 	End If
 Loop
 crt.Dialog.MessageBox("ENDE")
