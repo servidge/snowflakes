@@ -16,16 +16,19 @@
 Const ForReading = 1
 Management1ask = "Bitte Loginprompt eingeben oder Vorschlag mit OK bestätigen"
 Userabort = " q   Script beenden "
+MATCH = ":4300"	'Suchstring // Searchstring in Connection (: colon is in each line)
 
 Sub reset(subline)
-	subline=Replace(subline,":"," ")
-	Do Until InStr(subline, "  ") = 0
-		subline = Replace(subline, "   ", " ")
-		subline = Replace(subline, "  ", " ")
-	Loop
-	parameter = Split( subline )
-	crt.Screen.Send "!tcp connection send pass-reset source-addr " & parameter(1) & " source-port " & parameter(2) & " dest-addr " & parameter(3) & " dest-port " & parameter(4) & vbCR
-	crt.Screen.WaitForString management, 1
+	If InStr(1,subline,MATCH,1) then 
+		subline=Replace(subline,":"," ")
+		Do Until InStr(subline, "  ") = 0
+			subline = Replace(subline, "   ", " ")
+			subline = Replace(subline, "  ", " ")
+		Loop
+		parameter = Split( subline )
+		crt.Screen.Send "!tcp connection send pass-reset source-addr " & parameter(1) & " source-port " & parameter(2) & " dest-addr " & parameter(3) & " dest-port " & parameter(4) & vbCR
+		crt.Screen.WaitForString management, 1
+	End If
 End Sub
 
 Sub main
@@ -36,8 +39,8 @@ crt.Screen.Send " " & Chr(13)
 crt.Screen.Send " " & Chr(13)
 crt.Screen.Send " " & Chr(13)
 currentline = crt.Screen.Get(crt.screen.CurrentRow - 1 , 0, crt.screen.CurrentRow - 1, crt.Screen.Columns)
-management = inputbox("Prompt eingeben:" &vbCr&vbCr & Management1ask &vbCr& Userabort, "Prompt?",Trim(currentline))
-if Management = "q" then wscript.quit
+management = inputbox("Prompt eingeben:" &vbCr&vbCr & Management1ask &vbCr& Userabort, "Prompt?",Trim(currentline))		' Does not work well
+If Management = "q" then wscript.quit
 
 Dim fso, f
 Set fso = CreateObject("Scripting.FileSystemObject")
@@ -49,17 +52,17 @@ Dim line, parameter
 Do While f.AtEndOfStream <> True
 	line = f.Readline
 	line=LTrim(line)
-	If (Left(line,Len("O")) = "O") Then
+	If (Left(line,Len("O")) = "O") Then 		' optimized Connections
 	'reset(line)
-	Elseif (Left(line,Len("PI")) = "PI") Then
+	ElseIf (Left(line,Len("PI")) = "PI") Then	' passthrough intentional Connections
+	'reset(line)
+	ElseIf (Left(line,Len("PU")) = "PU") Then	' passthrough unintentional Connections
 	reset(line)
-	ElseIf (Left(line,Len("PU")) = "PU") Then
+	ElseIf (Left(line,Len("H")) = "H") Then		' half opend Connections
 	reset(line)
-	ElseIf (Left(line,Len("H")) = "H") Then
+	ElseIf (Left(line,Len("C")) = "C") Then		' half closed Connections
 	reset(line)
-	ElseIf (Left(line,Len("C")) = "C") Then
-	reset(line)
-	Else
+	Else										' probably not a connection
 	'crt.Dialog.MessageBox("debug" + line)
 	End If
 Loop
