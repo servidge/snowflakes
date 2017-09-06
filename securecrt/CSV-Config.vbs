@@ -12,9 +12,10 @@
 'crt.screen.synchronous = true
 'crt.screen.ignoreescape = true
 const forreading = 1
-username="USERNAME"
-password="PASSWORT"
-enable="SECRET"
+USERNAME="USERNAME"
+PASSWORD="PASSWORT"
+ENABLE="SECRET"
+Const logintimeout = 8
 
 management1ask = "Bitte Loginprompt eingeben oder Vorschlag mit Ok bestätigen // Please enter loginprompt or confirm suggestion with Ok"
 userabort = " q   Script beenden / Quit "
@@ -79,20 +80,34 @@ do while f.atendofstream <> true
 		string28 = split(line, ";")(28)
 		string29 = split(line, ";")(29)
 		string30 = split(line, ";")(30)
-		crt.Screen.Send "ssh -o ""StrictHostKeyChecking no"" -l " & username & " " & string01 & Chr(13)
-		crt.Screen.WaitForString("assword")
-		crt.Screen.Send password & Chr(13)
-		crt.Screen.WaitForString("#")
-		crt.Screen.Send "!DEBUG00 " & string00 & vbCr
-		crt.Screen.Send "!DEBUG01 " & string01 & vbCr
-		crt.Screen.Send "!DEBUG02 " & string02 & vbCr
-		crt.Screen.Send "!DEBUG03 " & string03 & vbCr
-		crt.Screen.Send "!DEBUG04 " & string04 & vbCr
+		
+		HOSTNAME = string01
+		crt.Screen.Send "ssh -o ""StrictHostKeyChecking no"" -l " & USERNAME & " " & HOSTNAME & Chr(13)
+		ResultConnect = crt.screen.WaitForStrings("assword","placeholder", logintimeout)
+		Select Case ResultConnect
+		Case 1 'assword
+			crt.Screen.Send PASSWORD & Chr(13)
+			crt.Screen.WaitForString("#")
+			crt.Screen.Send "!DEBUG00 " & string00 & vbCr
+			crt.Screen.Send "!DEBUG01 " & string01 & vbCr
+			crt.Screen.Send "!DEBUG02 " & string02 & vbCr
+			crt.Screen.Send "!DEBUG03 " & string03 & vbCr
+			crt.Screen.Send "!DEBUG04 " & string04 & vbCr
+			crt.Screen.Send Chr(13)
+			crt.Screen.Send "exit" & Chr(13)
+		Case 2 'placeholder
+			'log todo
+		Case Else 'timeout
+			'log todo
+			crt.Screen.Send Chr(3)
+			crt.Screen.Send Chr(3)
+			crt.Screen.Send Chr(13)
+			crt.Screen.Send Chr(13)
+		End Select
+		
 		crt.Screen.Send Chr(13)
-		crt.Screen.Send "exit" & Chr(13)
 		crt.Screen.WaitForString(management)
 	end if
 loop
 crt.dialog.messagebox("ENDE")
 end sub
-
