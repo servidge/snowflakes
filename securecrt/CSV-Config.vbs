@@ -89,10 +89,15 @@ do while f.atendofstream <> true
 			crt.Screen.Send PASSWORD & Chr(13)
 			crt.Screen.WaitForString("#")
 			crt.Screen.Send "!DEBUG00 " & string00 & vbCr
+			crt.Screen.WaitForString "#", 2
 			crt.Screen.Send "!DEBUG01 " & string01 & vbCr
+			crt.Screen.WaitForString "#", 2
 			crt.Screen.Send "!DEBUG02 " & string02 & vbCr
+			crt.Screen.WaitForString "#", 2
 			crt.Screen.Send "!DEBUG03 " & string03 & vbCr
+			crt.Screen.WaitForString "#", 2
 			crt.Screen.Send "!DEBUG04 " & string04 & vbCr
+			crt.Screen.WaitForString "#", 2
 			crt.Screen.Send Chr(13)
 			crt.Screen.Send "exit" & Chr(13)
 		Case 2 'placeholder
