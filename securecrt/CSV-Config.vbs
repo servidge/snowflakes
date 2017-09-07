@@ -57,49 +57,23 @@ do while f.atendofstream <> true
 		next
 		'maxstring=len(line) - len(replace(line, separator, "")) 
 		'crt.dialog.messagebox(maxstring & " DEBUG use: " & line)	
-		 	
-		item00 = split(line, separator)(0)
-		item01 = split(line, separator)(1)
-		item02 = split(line, separator)(2)
-		item03 = split(line, separator)(3)
-		item04 = split(line, separator)(4)
-		item05 = split(line, separator)(5)
-		item06 = split(line, separator)(6)
-		item07 = split(line, separator)(7)
-		item08 = split(line, separator)(8)
-		item09 = split(line, separator)(9)
-		item10 = split(line, separator)(10)
-		item11 = split(line, separator)(11)
-		item12 = split(line, separator)(12)
-		item13 = split(line, separator)(13)
-		item14 = split(line, separator)(14)
-		item15 = split(line, separator)(15)
-		item16 = split(line, separator)(16)
-		item17 = split(line, separator)(17)
-		item18 = split(line, separator)(18)
-		item19 = split(line, separator)(19)
-		item20 = split(line, separator)(20)
-		item21 = split(line, separator)(21)
-		item22 = split(line, separator)(22)
-		item23 = split(line, separator)(23)
-		item24 = split(line, separator)(24)
-		item25 = split(line, separator)(25)
-		item26 = split(line, separator)(26)
-		item27 = split(line, separator)(27)
-		item28 = split(line, separator)(28)
-		item29 = split(line, separator)(29)
-		item30 = split(line, separator)(30)
+		
+			itemARR = split(line, separator)
+			For Each item in itemARR
+				'crt.dialog.messagebox(" DEBUG use: " & item)			
+			Next
+
 		'##### Configjob START ##################
 		configjob="ter len 0" & chr(13)
 		configjob=configjob & "conf t " & chr(13)
-		configjob=configjob & "!DEBUG00 " & item00 & chr(13)
-		configjob=configjob & "!DEBUG01 " & item01 & chr(13)
-		configjob=configjob & "!DEBUG02 " & item02 & chr(13)
-		configjob=configjob & "!DEBUG03 " & item03 & chr(13)
-		configjob=configjob & "!DEBUG04 " & item04 & chr(13)
+		configjob=configjob & "!DEBUG00 " & itemARR(0) & chr(13)
+		configjob=configjob & "!DEBUG01 " & itemARR(1) & chr(13)
+		configjob=configjob & "!DEBUG02 " & itemARR(2) & chr(13)
+		configjob=configjob & "!DEBUG03 " & itemARR(3) & chr(13)
+		configjob=configjob & "!DEBUG04 " & itemARR(4) & chr(13)
 		configjob=configjob & "end" 
 		'##### Configjob ENDE  ##################
-		HOSTNAME = item01
+		HOSTNAME = itemARR(1)
 		crt.Screen.Send "ssh -o ""StrictHostKeyChecking no"" -l " & USERNAME & " " & HOSTNAME & Chr(13)
 		ResultConnect = crt.screen.WaitForStrings("assword","placeholder", logintimeout)
 		Select Case ResultConnect
