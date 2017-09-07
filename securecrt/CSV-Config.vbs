@@ -52,12 +52,11 @@ do while f.atendofstream <> true
 		'crt.dialog.messagebox("DEBUG commet: " & line)
 	else
 		'line = line & ";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;" ' 30columns+
-		crt.dialog.messagebox(maxstring & " DEBUG use: " & line)	
-		for i = 1 to sepadd
+		for i = 1 to sepadd ' 30columns+ backup
 			line = line & separator
 		next
-		maxstring=len(line) - len(replace(line, separator, "")) 
-		crt.dialog.messagebox(maxstring & " DEBUG use: " & line)	
+		'maxstring=len(line) - len(replace(line, separator, "")) 
+		'crt.dialog.messagebox(maxstring & " DEBUG use: " & line)	
 		string00 = split(line, separator)(0)
 		string01 = split(line, separator)(1)
 		string02 = split(line, separator)(2)
@@ -109,7 +108,7 @@ do while f.atendofstream <> true
 			
 			ARRJOB = split(configjob, chr(13))
 			For Each LINEJOB in ARRJOB
-			crt.dialog.messagebox(LINEJOB)
+				'crt.dialog.messagebox(LINEJOB)
 				crt.Screen.Send LINEJOB & Chr(13)
 				crt.Screen.WaitForString sendmarker, sendwaitsec
 			Next
