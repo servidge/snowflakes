@@ -35,6 +35,14 @@ currentline = crt.screen.get(crt.screen.currentrow - 1 , 0, crt.screen.currentro
 management = inputbox("Enter Service Prompt:" &vbcr&vbcr & management1ask &vbcr& userabort, "Prompt?",trim(currentline))		' does not work well
 if management = "q" then wscript.quit
 
+do
+	USERNAME = crt.Dialog.Prompt("Enter your username", "Login", USERNAME, False)
+loop until USERNAME <> ""
+do
+	PASSWORD = crt.Dialog.Prompt("Enter your login password", "Password", "", True)
+loop until PASSWORD <> ""
+do
+loop until enable <> ""
 
 dim fso, f
 set fso = createobject("scripting.filesystemobject")
