@@ -8,32 +8,54 @@
 ' !beispieldatei - dummyinput
 ' Hostname1;192.168.1.1;loopback 1;10.10.1.1;255.255.255.255;
 ' Hostname2;192.168.2.1;loopback 1;10.10.2.1;255.255.255.255;
-
+Option Explicit
+'On Error Resume Next
 'crt.screen.synchronous = true
 'crt.screen.ignoreescape = true
-const forreading = 1
-USERNAME="USERNAME"
-PASSWORD="PASSWORT"
-ENABLE="SECRET"
+Dim USERNAME, PASSWORD, ENABLE, HOSTNAME
+Dim management1ask, userabort
+Dim fso, f, inputfile, logextension, logfile, filelogging
+Dim currentline, management, line, i
+Dim maxstring
+Dim configjob, itemARR, item, LINEJOB, ARRJOB
+Dim ResultConnect
+Const ForReading = 1
+Const ForWriting = 2
+Const ForAppending = 8
 Const logintimeout = 8
 Const sendwaitsec = 2
 Const sendmarker = "#"
 Const separator = ";"
 Const sepadd = 30
-
-
-management1ask = "Bitte Loginprompt eingeben oder Vorschlag mit Ok bestätigen // Please enter loginprompt or confirm suggestion with Ok"
+USERNAME="USERNAME"
+PASSWORD="PASSWORT"
+ENABLE="SECRET"
+logextension = ".log"
+Const logpath = ".\"
+management1ask = "Bitte Loginprompt eingeben oder Vorschlag mit Ok bestaetigen // Please enter loginprompt or confirm suggestion with Ok"
 userabort = " q   Script beenden / Quit "
+Set fso = CreateObject("Scripting.FileSystemObject")
 
-sub main
+
 crt.dialog.messagebox("START")
+inputfile = crt.dialog.fileopendialog("Select Inputfile", "open", "CSV-Config-input.txt", "text files (*.txt)|*.txt||")
+'inputfile="CSV-Config-input.txt" 'old securecrt version. before ~6.7
+logfile = fso.GetBaseName(inputfile)&logextension
+If not fso.FileExists(logpath & logfile) then
+	Set filelogging = fso.OpenTextFile(logpath & logfile,ForWriting,True)
+		filelogging.WriteLine("angelegt am - "&now()&" - generated ")
+	Set filelogging = Nothing
+End If
+
+
+Sub main
 crt.screen.send " " & chr(13)
 crt.screen.send " " & chr(13)
 crt.screen.send " " & chr(13)
 crt.screen.send " " & chr(13)
 currentline = crt.screen.get(crt.screen.currentrow - 1 , 0, crt.screen.currentrow - 1, crt.screen.columns)
 management = inputbox("Enter Service Prompt:" &vbcr&vbcr & management1ask &vbcr& userabort, "Prompt?",trim(currentline))		' does not work well
-if management = "q" then wscript.quit
+If management = "q" then wscript.quit
 
 do
 	USERNAME = crt.Dialog.Prompt("Enter your username", "Login", USERNAME, False)
@@ -42,23 +64,19 @@ do
 	PASSWORD = crt.Dialog.Prompt("Enter your login password", "Password", "", True)
 loop until PASSWORD <> ""
 do
+	enable = crt.Dialog.Prompt("Enter your enable secret", "Secret", "", True)
 loop until enable <> ""
 
-dim fso, f
-set fso = createobject("scripting.filesystemobject")
-inputfile = crt.dialog.fileopendialog("Select Inputfile", "open", "csv-config-input.txt", "text files (*.txt)|*.txt||")
-'inputfile="csv-config-input.txt" 'old securecrt version. before ~6.7
-set f = fso.opentextfile(inputfile, forreading, 0)
-
-dim line, parameter, maxstring
+writelog "SCRIPT", "START"
+Set f = fso.opentextfile(inputfile, ForReading, 0)
 do while f.atendofstream <> true
 	line = f.readline
 	line = ltrim(line)
-	if len(line) = 0 then
+	If len(line) = 0 then
 		'crt.dialog.messagebox("DEBUG commet: BLANK " )
-	elseif (left(line,1) = "!") then
+	ElseIf (left(line,1) = "!") then
 		'crt.dialog.messagebox("DEBUG commet: " & line)
-	else
+	Else
 		'line = line & ";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;" ' 30columns+
 		for i = 1 to sepadd ' 30columns+ backup
 			line = line & separator
@@ -80,12 +98,13 @@ do while f.atendofstream <> true
 		configjob=configjob & "!DEBUG03 " & itemARR(3) & chr(13)
 		configjob=configjob & "!DEBUG04 " & itemARR(4) & chr(13)
 		configjob=configjob & "end" 
-		'##### Configjob ENDE  ##################
 		HOSTNAME = itemARR(1)
+		'##### Configjob ENDE  ##################
+
 		crt.Screen.Send "ssh -o ""StrictHostKeyChecking no"" -l " & USERNAME & " " & HOSTNAME & Chr(13)
 		ResultConnect = crt.screen.WaitForStrings("assword","placeholder", logintimeout)
 		Select Case ResultConnect
-		Case 1 'assword
+		Case 1 'assword ("Perfect World")
 			crt.Screen.Send PASSWORD & Chr(13)
 			crt.Screen.WaitForString sendmarker, sendwaitsec
 			
@@ -99,10 +118,11 @@ do while f.atendofstream <> true
 			crt.Screen.Send Chr(13) 
 			crt.Screen.WaitForString sendmarker, sendwaitsec
 			crt.Screen.Send "exit" & Chr(13)
+			writelog HOSTNAME, "OK"
 		Case 2 'placeholder
-			'log todo
+			writelog HOSTNAME, "placeholder"
 		Case Else 'timeout
-			'log todo
+			writelog HOSTNAME, "timeout"
 			crt.Screen.Send Chr(3)
 			crt.Screen.Send Chr(3)
 			crt.Screen.Send Chr(13)
@@ -111,7 +131,16 @@ do while f.atendofstream <> true
 		
 		crt.Screen.Send Chr(13)
 		crt.Screen.WaitForString(management)
-	end if
+	End If
 loop
+writelog "SCRIPT", "ENDE"
 crt.dialog.messagebox("ENDE")
-end sub
+End Sub
+
+Sub writelog(val0,val1) 
+  Dim file
+  Set file = fso.OpenTextFile(logpath & logfile, ForAppending, True)
+  file.write now() & Chr(9) & val0 & Chr(9) & val1 & Chr(9) & vbCrLf
+  file.close
+End Sub
+
