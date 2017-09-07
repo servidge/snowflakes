@@ -17,6 +17,7 @@ PASSWORD="PASSWORT"
 ENABLE="SECRET"
 Const logintimeout = 8
 Const sendwaitsec = 2
+Const sendmarker ="#"
 
 management1ask = "Bitte Loginprompt eingeben oder Vorschlag mit Ok bestätigen // Please enter loginprompt or confirm suggestion with Ok"
 userabort = " q   Script beenden / Quit "
@@ -88,17 +89,21 @@ do while f.atendofstream <> true
 		Select Case ResultConnect
 		Case 1 'assword
 			crt.Screen.Send PASSWORD & Chr(13)
-			crt.Screen.WaitForString("#")
-			crt.Screen.Send "!DEBUG00 " & string00 & vbCr
-			crt.Screen.WaitForString "#", sendwaitsec
-			crt.Screen.Send "!DEBUG01 " & string01 & vbCr
-			crt.Screen.WaitForString "#", sendwaitsec
-			crt.Screen.Send "!DEBUG02 " & string02 & vbCr
-			crt.Screen.WaitForString "#", sendwaitsec
-			crt.Screen.Send "!DEBUG03 " & string03 & vbCr
-			crt.Screen.WaitForString "#", sendwaitsec
-			crt.Screen.Send "!DEBUG04 " & string04 & vbCr
-			crt.Screen.WaitForString "#", sendwaitsec
+			crt.Screen.WaitForString sendmarker, sendwaitsec
+			crt.Screen.Send "conf t " & Chr(13)
+			crt.Screen.WaitForString sendmarker, sendwaitsec
+			crt.Screen.Send "!DEBUG00 " & string00 & Chr(13)
+			crt.Screen.WaitForString sendmarker, sendwaitsec
+			crt.Screen.Send "!DEBUG01 " & string01 & Chr(13)
+			crt.Screen.WaitForString sendmarker, sendwaitsec
+			crt.Screen.Send "!DEBUG02 " & string02 & Chr(13)
+			crt.Screen.WaitForString sendmarker, sendwaitsec
+			crt.Screen.Send "!DEBUG03 " & string03 & Chr(13)
+			crt.Screen.WaitForString sendmarker, sendwaitsec
+			crt.Screen.Send "!DEBUG04 " & string04 & Chr(13)
+			crt.Screen.WaitForString sendmarker, sendwaitsec
+			crt.Screen.Send "end" & Chr(13)
+			crt.Screen.WaitForString sendmarker, sendwaitsec
 			crt.Screen.Send Chr(13)
 			crt.Screen.Send "exit" & Chr(13)
 		Case 2 'placeholder
