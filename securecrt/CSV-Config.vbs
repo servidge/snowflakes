@@ -1,4 +1,4 @@
-# $language = "vbscript"
+# $language = "VBScript"
 # $interface = "1.0"
 ' Script zum konfigurieren anhand einer csv Input Datei. 
 ' Script to configure devices using a csv input file.
@@ -15,9 +15,9 @@ Option Explicit
 Dim USERNAME, PASSWORD, ENABLE, HOSTNAME
 Dim management1ask, userabort
 Dim fso, f, inputfile, logextension, logfile, filelogging
-Dim currentline, management, line, i
+Dim currentline, management, line, i, n
 Dim maxstring
-Dim configjob, itemARR, item, LINEJOB, ARRJOB
+Dim configjob, itemARR, item, LINEJOB, ARRJOB, startrow
 Dim ResultConnect
 Const ForReading = 1
 Const ForWriting = 2
@@ -81,7 +81,7 @@ do while f.atendofstream <> true
 		for i = 1 to sepadd ' 30columns+ backup
 			line = line & separator
 		next
-		'maxstring=len(line) - len(replace(line, separator, "")) 
+		maxstring=len(line) - len(replace(line, separator, "")) 
 		'crt.dialog.messagebox(maxstring & " DEBUG use: " & line)	
 		
 			itemARR = split(line, separator)
@@ -90,6 +90,7 @@ do while f.atendofstream <> true
 			Next
 
 		'##### Configjob START ##################
+		'##### Configjob type 1, only single variables
 		configjob="ter len 0" & chr(13)
 		configjob=configjob & "conf t " & chr(13)
 		configjob=configjob & "!DEBUG00 " & itemARR(0) & chr(13)
@@ -98,9 +99,19 @@ do while f.atendofstream <> true
 		configjob=configjob & "!DEBUG03 " & itemARR(3) & chr(13)
 		configjob=configjob & "!DEBUG04 " & itemARR(4) & chr(13)
 		configjob=configjob & "end" 
-		HOSTNAME = itemARR(1)
+		'##### Configjob type 2, whole command per column
+		' startrow = 5 ' count from 0
+		' configjob="ter len 0" & chr(13)
+		' configjob=configjob & "conf t " & chr(13)
+		' for n = startrow to maxstring
+		' If len(itemARR(n)) <> 0 then
+		' 	configjob=configjob &"!"& itemARR(n) & chr(13) '"!"=debug
+		' End If
+		' next
+		' configjob=configjob & "end" 
 		'##### Configjob ENDE  ##################
-
+		HOSTNAME = itemARR(1)
+		
 		crt.Screen.Send "ssh -o ""StrictHostKeyChecking no"" -l " & USERNAME & " " & HOSTNAME & Chr(13)
 		ResultConnect = crt.screen.WaitForStrings("assword","placeholder", logintimeout)
 		Select Case ResultConnect
