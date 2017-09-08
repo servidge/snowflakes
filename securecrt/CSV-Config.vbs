@@ -104,7 +104,7 @@ do while f.atendofstream <> true
 		' configjob="ter len 0" & chr(13)
 		' configjob=configjob & "conf t " & chr(13)
 		' for n = startrow to maxstring
-		' If len(itemARR(n)) <> 0 then
+		' If len(Trim(itemARR(n))) <> 0 then
 		' 	configjob=configjob &"!"& itemARR(n) & chr(13) '"!"=debug
 		' End If
 		' next
