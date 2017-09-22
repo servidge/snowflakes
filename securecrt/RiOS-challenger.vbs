@@ -49,47 +49,47 @@ do
 			Case 2
 				crt.Sleep 200
 				crt.Screen.Send "cli challenge response " & respon1 & vbCr
-				msgbox "That's a Bingo!"
+				'MsgBox "That's a Bingo!"
 				crt.Sleep 2000
 				Exit Do
 			Case 3
 				crt.Sleep 200
 				crt.Screen.Send "cli challenge response " & respon2 & vbCr
-				msgbox "That's a Bingo!"
+				'MsgBox "That's a Bingo!"
 				crt.Sleep 2000
 				Exit Do
 			Case 4
 				crt.Sleep 200
 				crt.Screen.Send "cli challenge response " & respon3 & vbCr
-				msgbox "That's a Bingo!"
+				'MsgBox "That's a Bingo!"
 				crt.Sleep 2000
 				Exit Do
 			Case 5
 				crt.Sleep 200
 				crt.Screen.Send "cli challenge response " & respon4 & vbCr
-				msgbox "That's a Bingo!"
+				'MsgBox "That's a Bingo!"
 				crt.Sleep 2000
 				Exit Do
 			Case 6
 				crt.Sleep 200
 				crt.Screen.Send "cli challenge response " & respon5 & vbCr
-				msgbox "That's a Bingo!"
+				'MsgBox "That's a Bingo!"
 				crt.Sleep 2000		
 				Exit Do
 			Case 7
 				crt.Sleep 200
 				crt.Screen.Send "cli challenge response " & respon6 & vbCr
-				msgbox "That's a Bingo!"
+				'MsgBox "That's a Bingo!"
 				crt.Sleep 2000
 				Exit Do
 			Case 8
 				crt.Sleep 200
 				crt.Screen.Send "cli challenge response " & respon7 & vbCr
-				msgbox "That's a Bingo!"
+				'MsgBox "That's a Bingo!"
 				crt.Sleep 2000	
 				Exit Do		
 			Case 9
-				msgbox "That's not a Bingo!!!!!!!!!!!!!!!!!!!!!!!!!!"
+				MsgBox "That's not a Bingo!!!!!!!!!!!!!!!!!!!!!!!!!!"
 		Case Else
 	End Select
 Loop
@@ -98,5 +98,6 @@ crt.Sleep 200
 'crt.Screen.Send "conf t" & vbCr
 'crt.Screen.Send "internal set modify - /stats/config/alarm/........ " & vbCr
 'crt.Screen.Send "wr mem" & vbCr
+MsgBox "That's a Bingo!"
 
 End Sub
