@@ -16,8 +16,13 @@
 $socket = stream_socket_server("udp://0.0.0.0:2055", $errno, $errstr, STREAM_SERVER_BIND);
 if (!$socket) {
     die("$errstr ($errno)");
+
 }
- 
+#Print Header
+echo "|   |                |      |                |      |    |          |          |".PHP_EOL;
+echo "|Pro|        Quell-IP|Q-Port|         Ziel-IP|Z-Port|Seku|    Pakete|     Bytes|".PHP_EOL;
+echo "|Pro|       Source-IP|S-Port|  Destination-IP|D-Port| Sec|    Pacets|     Bytes|".PHP_EOL;
+
 do {
  # We now wait for a packet.  Standard MTU is 1500.  
  # I will need to check on if this needs to be moved to 9000+ for VMWare instances using Jumbo Packets.
@@ -68,8 +73,30 @@ function fv5 ($p, $peer) {
  $sec = $flowdata['Last'] - $flowdata['First'];
  $sec = $sec / 1000;
  $sec = round ($sec);
- #Print 
- echo  '|Proto|'. $flowdata['prot'].'|Sek|'.$sec.'|S|'.$flowdata['srcaddr1'].'.'.$flowdata['srcaddr2'].'.'.$flowdata['srcaddr3'].'.'.$flowdata['srcaddr4'].':'.$flowdata['srcport'].'|D|'.$flowdata['dstaddr1'].'.'.$flowdata['dstaddr2'].'.'.$flowdata['dstaddr3'].'.'.$flowdata['dstaddr4'].':'.$flowdata['dstport'].'|Pakete|'.$flowdata['dPkts'].'|Octets|'.$flowdata['dOctets'].PHP_EOL;
 
+#Print 
+#echo  "|".str_pad($flowdata['prot'],3," ",STR_PAD_LEFT)."|".
+#str_pad($flowdata['srcaddr1'].'.'.$flowdata['srcaddr2'].'.'.$flowdata['srcaddr3'].'.'.$flowdata['srcaddr4'],16," ",STR_PAD_LEFT)."|".
+#str_pad($flowdata['srcport'],6," ",STR_PAD_LEFT)."|".
+#str_pad($flowdata['dstaddr1'].'.'.$flowdata['dstaddr2'].'.'.$flowdata['dstaddr3'].'.'.$flowdata['dstaddr4'],16," ",STR_PAD_LEFT)."|".
+#str_pad($flowdata['dstport'],6," ",STR_PAD_LEFT)."|".
+#str_pad($sec,4," ",STR_PAD_LEFT)."|".
+#str_pad($flowdata['dPkts'],10," ",STR_PAD_LEFT)."|".
+#str_pad($flowdata['dOctets'],10," ",STR_PAD_LEFT)."|".PHP_EOL;
+
+echo "|".str_pad($flowdata['prot'],3," ",STR_PAD_LEFT)."|".
+str_pad(str_pad($flowdata['srcaddr1'],3," ",STR_PAD_LEFT).'.'.
+str_pad($flowdata['srcaddr2'],3," ",STR_PAD_LEFT).'.'.
+str_pad($flowdata['srcaddr3'],3," ",STR_PAD_LEFT).'.'.
+str_pad($flowdata['srcaddr4'],3," ",STR_PAD_LEFT),16," ",STR_PAD_LEFT)."|".
+str_pad($flowdata['srcport'],6," ",STR_PAD_LEFT)."|".
+str_pad(str_pad($flowdata['dstaddr1'],3," ",STR_PAD_LEFT).'.'.
+str_pad($flowdata['dstaddr2'],3," ",STR_PAD_LEFT).'.'.
+str_pad($flowdata['dstaddr3'],3," ",STR_PAD_LEFT).'.'.
+str_pad($flowdata['dstaddr4'],3," ",STR_PAD_LEFT),16," ",STR_PAD_LEFT)."|".
+str_pad($flowdata['dstport'],6," ",STR_PAD_LEFT)."|".
+str_pad($sec,4," ",STR_PAD_LEFT)."|".
+str_pad($flowdata['dPkts'],10," ",STR_PAD_LEFT)."|".
+str_pad($flowdata['dOctets'],10," ",STR_PAD_LEFT)."|".PHP_EOL;
 
 }
