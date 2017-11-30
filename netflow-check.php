@@ -29,6 +29,10 @@ do {
  if ($version[1] == 5) {
  fv5($p, $peer);
  }
+ else 
+ { 
+ echo 'Wrong Flowversion. Just v5 Flows are processed. Recognized Packet format: '.$version[1].PHP_EOL;
+ }
 } while ($p !== false);
  
 function fv5 ($p, $peer) {
