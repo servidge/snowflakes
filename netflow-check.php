@@ -63,5 +63,13 @@ function fv5 ($p, $peer) {
  #
  }
  #print_r ($flowdata)
- echo  '|Proto|'. $flowdata['prot'].'|S|'.$flowdata['srcaddr1'].'.'.$flowdata['srcaddr2'].'.'.$flowdata['srcaddr3'].'.'.$flowdata['srcaddr4'].':'.$flowdata['srcport'].'|D|'.$flowdata['dstaddr1'].'.'.$flowdata['dstaddr2'].'.'.$flowdata['dstaddr3'].'.'.$flowdata['dstaddr4'].':'.$flowdata['dstport'].'|Pakete|'.$flowdata['dPkts'].'|Octets|'.$flowdata['dOctets'].PHP_EOL;
+
+ #Calculate flow time
+ $sec = $flowdata['Last'] - $flowdata['First'];
+ $sec = $sec / 1000;
+ $sec = round ($sec);
+ #Print 
+ echo  '|Proto|'. $flowdata['prot'].'|Sek|'.$sec.'|S|'.$flowdata['srcaddr1'].'.'.$flowdata['srcaddr2'].'.'.$flowdata['srcaddr3'].'.'.$flowdata['srcaddr4'].':'.$flowdata['srcport'].'|D|'.$flowdata['dstaddr1'].'.'.$flowdata['dstaddr2'].'.'.$flowdata['dstaddr3'].'.'.$flowdata['dstaddr4'].':'.$flowdata['dstport'].'|Pakete|'.$flowdata['dPkts'].'|Octets|'.$flowdata['dOctets'].PHP_EOL;
+
+
 }
