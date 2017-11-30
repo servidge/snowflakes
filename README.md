@@ -13,6 +13,8 @@ Scripts which i use at work, home, elsewhere. Mostly for a single use.
 * securecrt/RiOS-reset-connection-input.txt - Inputfile with Sample Connections
 * securecrt/CSV-Config.vbs - SecureCRT vbScript for mass configuration from CSV inputfile.
 * securecrt/CSV-Config-input.txt - Inputfile with Sample Entries
+### PHP
+* netflow-check.php - start udp socket, receive packet, print out netflow v5 data. No further processing
 
 # Kleinkram
 Kleinkram, nützliches, brauchbares, zur einmalbenutzung in bash, perl, vbs, was auch immer das Problem löst. 
@@ -29,3 +31,6 @@ Scripte die ich hier und da, auf der Arbeit oder sonstwo laufen. Meistens für e
 * securecrt/RiOS-reset-connection-input.txt - Inputdatei mit Beispielverbindungen
 * securecrt/CSV-Config.vbs - SecureCRT vbScript zur Massenkonfiguration Anhand CSV Inputdatei.
 * securecrt/CSV-Config-input.txt - Inputdatei mit Beispieleinträgen
+### PHP
+* netflow-check.php - Start udp Socket, Pakete empfangen, netflow v5 Daten ausgeben. Keine weitere Verarbeitung
+
