@@ -79,29 +79,32 @@ function fv5 ($p, $peer) {
  $sec = $sec / 1000;
  $sec = round ($sec);
 
-#Print 
-#echo  "|".str_pad($flowdata['prot'],3," ",STR_PAD_LEFT)."|".
-#str_pad($flowdata['srcaddr1'].'.'.$flowdata['srcaddr2'].'.'.$flowdata['srcaddr3'].'.'.$flowdata['srcaddr4'],16," ",STR_PAD_LEFT)."|".
-#str_pad($flowdata['srcport'],6," ",STR_PAD_LEFT)."|".
-#str_pad($flowdata['dstaddr1'].'.'.$flowdata['dstaddr2'].'.'.$flowdata['dstaddr3'].'.'.$flowdata['dstaddr4'],16," ",STR_PAD_LEFT)."|".
-#str_pad($flowdata['dstport'],6," ",STR_PAD_LEFT)."|".
-#str_pad($sec,4," ",STR_PAD_LEFT)."|".
-#str_pad($flowdata['dPkts'],10," ",STR_PAD_LEFT)."|".
-#str_pad($flowdata['dOctets'],10," ",STR_PAD_LEFT)."|".PHP_EOL;
+ #Print 
+ #|  6|   10.19.164.131| 62468|   10.127.255.18|  8080|   6|        12|      2501|
+ #echo  "|".str_pad($flowdata['prot'],3," ",STR_PAD_LEFT)."|".
+ #str_pad($flowdata['srcaddr1'].'.'.$flowdata['srcaddr2'].'.'.$flowdata['srcaddr3'].'.'.$flowdata['srcaddr4'],16," ",STR_PAD_LEFT)."|".
+ #str_pad($flowdata['srcport'],6," ",STR_PAD_LEFT)."|".
+ #str_pad($flowdata['dstaddr1'].'.'.$flowdata['dstaddr2'].'.'.$flowdata['dstaddr3'].'.'.$flowdata['dstaddr4'],16," ",STR_PAD_LEFT)."|".
+ #str_pad($flowdata['dstport'],6," ",STR_PAD_LEFT)."|".
+ #str_pad($sec,4," ",STR_PAD_LEFT)."|".
+ #str_pad($flowdata['dPkts'],10," ",STR_PAD_LEFT)."|".
+ #str_pad($flowdata['dOctets'],10," ",STR_PAD_LEFT)."|".PHP_EOL;
 
-echo "|".str_pad($flowdata['prot'],3," ",STR_PAD_LEFT)."|".
-str_pad(str_pad($flowdata['srcaddr1'],3," ",STR_PAD_LEFT).'.'.
-str_pad($flowdata['srcaddr2'],3," ",STR_PAD_LEFT).'.'.
-str_pad($flowdata['srcaddr3'],3," ",STR_PAD_LEFT).'.'.
-str_pad($flowdata['srcaddr4'],3," ",STR_PAD_LEFT),16," ",STR_PAD_LEFT)."|".
-str_pad($flowdata['srcport'],6," ",STR_PAD_LEFT)."|".
-str_pad(str_pad($flowdata['dstaddr1'],3," ",STR_PAD_LEFT).'.'.
-str_pad($flowdata['dstaddr2'],3," ",STR_PAD_LEFT).'.'.
-str_pad($flowdata['dstaddr3'],3," ",STR_PAD_LEFT).'.'.
-str_pad($flowdata['dstaddr4'],3," ",STR_PAD_LEFT),16," ",STR_PAD_LEFT)."|".
-str_pad($flowdata['dstport'],6," ",STR_PAD_LEFT)."|".
-str_pad($sec,4," ",STR_PAD_LEFT)."|".
-str_pad($flowdata['dPkts'],10," ",STR_PAD_LEFT)."|".
-str_pad($flowdata['dOctets'],10," ",STR_PAD_LEFT)."|".PHP_EOL;
+ #Print 
+ #|  6|  10. 19.164.131| 62468|  10.127.255. 18|  8080|   6|        12|      2501|
+ echo "|".str_pad($flowdata['prot'],3," ",STR_PAD_LEFT)."|".
+ str_pad(str_pad($flowdata['srcaddr1'],3," ",STR_PAD_LEFT).'.'.
+ str_pad($flowdata['srcaddr2'],3," ",STR_PAD_LEFT).'.'.
+ str_pad($flowdata['srcaddr3'],3," ",STR_PAD_LEFT).'.'.
+ str_pad($flowdata['srcaddr4'],3," ",STR_PAD_LEFT),16," ",STR_PAD_LEFT)."|".
+ str_pad($flowdata['srcport'],6," ",STR_PAD_LEFT)."|".
+ str_pad(str_pad($flowdata['dstaddr1'],3," ",STR_PAD_LEFT).'.'.
+ str_pad($flowdata['dstaddr2'],3," ",STR_PAD_LEFT).'.'.
+ str_pad($flowdata['dstaddr3'],3," ",STR_PAD_LEFT).'.'.
+ str_pad($flowdata['dstaddr4'],3," ",STR_PAD_LEFT),16," ",STR_PAD_LEFT)."|".
+ str_pad($flowdata['dstport'],6," ",STR_PAD_LEFT)."|".
+ str_pad($sec,4," ",STR_PAD_LEFT)."|".
+ str_pad($flowdata['dPkts'],10," ",STR_PAD_LEFT)."|".
+ str_pad($flowdata['dOctets'],10," ",STR_PAD_LEFT)."|".PHP_EOL;
 
 }
