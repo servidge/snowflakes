@@ -20,6 +20,7 @@ if (!$socket) {
 
 }
 #Print Warning
+echo "Attention, other running sockets may be terminated through this Start. ".$harvester.PHP_EOL;
 echo "".PHP_EOL;
 
 #Print Header
