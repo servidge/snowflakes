@@ -27,8 +27,8 @@ do {
  # This is were you would check to see if it is v9 or v10 also to decode those types of packets
  $version = unpack("n", substr($p, 0, 2));
  if ($version[1] == 5) {
-fv5($p, $peer);
-}
+ fv5($p, $peer);
+ }
 } while ($p !== false);
  
 function fv5 ($p, $peer) {
@@ -58,4 +58,6 @@ function fv5 ($p, $peer) {
  # I personally just insert it into a Memory table in a MySQL database for later processing.
  #
  }
+ #print_r ($flowdata)
+ echo  '|Proto|'. $flowdata['prot'].'|S|'.$flowdata['srcaddr1'].'.'.$flowdata['srcaddr2'].'.'.$flowdata['srcaddr3'].'.'.$flowdata['srcaddr4'].':'.$flowdata['srcport'].'|D|'.$flowdata['dstaddr1'].'.'.$flowdata['dstaddr2'].'.'.$flowdata['dstaddr3'].'.'.$flowdata['dstaddr4'].':'.$flowdata['dstport'].'|Pakete|'.$flowdata['dPkts'].'|Octets|'.$flowdata['dOctets'].PHP_EOL;
 }
