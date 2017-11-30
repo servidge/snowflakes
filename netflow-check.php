@@ -13,11 +13,15 @@
 # <Start Original from http://blog.cactiusers.org/2014/06/06/decoding-netflow-v5-packets-with-php/>
 #<?php
 # We first setup our listening UDP Socket.  We use the default port of 2055, but that can be changed to anything
-$socket = stream_socket_server("udp://0.0.0.0:2055", $errno, $errstr, STREAM_SERVER_BIND);
+$harvester = "udp://0.0.0.0:2055"
+$socket = stream_socket_server($harvester, $errno, $errstr, STREAM_SERVER_BIND);
 if (!$socket) {
     die("$errstr ($errno)");
 
 }
+#Print Warning
+echo "".PHP_EOL;
+
 #Print Header
 echo "|   |                |      |                |      |    |          |          |".PHP_EOL;
 echo "|Pro|        Quell-IP|Q-Port|         Ziel-IP|Z-Port|Seku|    Pakete|     Bytes|".PHP_EOL;
