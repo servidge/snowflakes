@@ -20,18 +20,25 @@
 
 AUSGABE=""
 f_transform(){
+PROTO=""
+SOURCEIP=""
+DSTPORT=""
+ACTION=""
+ZEITSTEMPEL=$(date -d$1 +%s)a
+COLOR="FFFFCC"
 ZEILE=$@
 for SPALTE in $ZEILE; do
 	if [[ $SPALTE == SRC=* ]]; then
-		AUSGABE=$SPALTE
+		SOURCEIP=${SPALTE:4}
 	elif [[ $SPALTE == PROTO=* ]]; then
-		AUSGABE=$AUSGABE"; "$SPALTE
+		PROTO=${SPALTE:6}
 	elif [[ $SPALTE == DPT=* ]]; then
-		AUSGABE=$AUSGABE"; "$SPALTE
+		DSTPORT=${SPALTE:4}
+	elif [[ $SPALTE == iptables-* ]]; then
+		ACTION=${SPALTE:9}
 	fi
 done
-echo $AUSGABE
-AUSGABE=""
+echo $ZEITSTEMPEL"|"$SOURCEIP"|"$DSTPORT-$PROTO"|"$ACTION"|40|1|"$COLOR
  }
 
 if [ -p /dev/stdin ]; then
@@ -48,4 +55,3 @@ else
 		echo "Nichts angegeben!"
 	fi
 fi
-
