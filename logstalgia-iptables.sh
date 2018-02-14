@@ -18,7 +18,6 @@
 #
 #
 
-AUSGABE=""
 f_transform(){
 PROTO=""
 SOURCEIP=""
