@@ -24,9 +24,10 @@ PROTO=""
 SOURCEIP=""
 DSTPORT=""
 ACTION=""
-ZEITSTEMPEL=$(date -d$1 +%s)a
 COLOR="FFFFCC"
+SUCCE="0"
 ZEILE=$@
+ZEITSTEMPEL=$(date -d$1 +%s)a
 for SPALTE in $ZEILE; do
 	if [[ $SPALTE == SRC=* ]]; then
 		SOURCEIP=${SPALTE:4}
@@ -36,9 +37,22 @@ for SPALTE in $ZEILE; do
 		DSTPORT=${SPALTE:4}
 	elif [[ $SPALTE == iptables-* ]]; then
 		ACTION=${SPALTE:9}
+		if [[ $ACTION == accept ]]; then
+			COLOR="00FF00"
+			SUCCE="0"
+		elif [[ $ACTION == drop ]]; then
+			COLOR="FF0000"
+			SUCCE="1"
+		elif [[ $ACTION == reject ]]; then
+			COLOR="FFA500"
+			SUCCE="1"
+		else
+			COLOR="FFC0CB"
+			SUCCE="1"
+        fi
 	fi
 done
-echo $ZEITSTEMPEL"|"$SOURCEIP"|"$DSTPORT-$PROTO"|"$ACTION"|40|1|"$COLOR
+echo $ZEITSTEMPEL"|"$SOURCEIP"|"$DSTPORT-$PROTO"|"$ACTION"|40|"$SUCCE"|"$COLOR"|"
  }
 
 if [ -p /dev/stdin ]; then
