@@ -1,7 +1,7 @@
 ﻿#!/bin/bash
 # Umsetzung von iptables Log in ein von logstalgia verarbeitbares Format. 
 # Conversion of iptables log into logstalgia usable format.
-# logstalgia.io "..website traffic visualization..." 
+# logstalgia.io "..website traffic visualization..." - https://github.com/acaudwell/Logstalgia/wiki/Custom-Log-Format
 # Part of https://github.com/servidge/snowflakes
 # äöüß
 # iptableskonfig
@@ -22,6 +22,7 @@ AUSGABE=""
 f_transform(){
 PROTO=""
 SOURCEIP=""
+DSTINAIP=""
 DSTPORT=""
 ACTION=""
 COLOR="FFFFCC"
@@ -31,6 +32,8 @@ ZEITSTEMPEL=$(date -d$1 +%s)a
 for SPALTE in $ZEILE; do
 	if [[ $SPALTE == SRC=* ]]; then
 		SOURCEIP=${SPALTE:4}
+	elif [[ $SPALTE == DST=* ]]; then
+		DSTINAIP=${SPALTE:4}
 	elif [[ $SPALTE == PROTO=* ]]; then
 		PROTO=${SPALTE:6}
 	elif [[ $SPALTE == DPT=* ]]; then
@@ -52,7 +55,7 @@ for SPALTE in $ZEILE; do
         fi
 	fi
 done
-echo $ZEITSTEMPEL"|"$SOURCEIP"|"$DSTPORT-$PROTO"|"$ACTION"|40|"$SUCCE"|"$COLOR"|"
+echo $ZEITSTEMPEL"|"$SOURCEIP"|"$DSTPORT-$PROTO"|"$ACTION"|40|"$SUCCE"|"$COLOR"|0|0|"$DSTINAIP"|PID"
  }
 
 if [ -p /dev/stdin ]; then
