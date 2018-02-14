@@ -23,6 +23,7 @@ PROTO=""
 SOURCEIP=""
 DSTINAIP=""
 DSTPORT=""
+SIZE="0"
 ACTION=""
 COLOR="FFFFCC"
 SUCCE="0"
@@ -37,6 +38,10 @@ for SPALTE in $ZEILE; do
 		PROTO=${SPALTE:6}
 	elif [[ $SPALTE == DPT=* ]]; then
 		DSTPORT=${SPALTE:4}
+	elif [[ $SPALTE == LEN=* ]]; then
+		if [[ ${SPALTE:4} -gt $SIZE ]]; then
+			SIZE=${SPALTE:4}
+		fi
 	elif [[ $SPALTE == iptables-* ]]; then
 		ACTION=${SPALTE:9}
 		if [[ $ACTION == accept ]]; then
@@ -54,7 +59,7 @@ for SPALTE in $ZEILE; do
         fi
 	fi
 done
-echo $ZEITSTEMPEL"|"$SOURCEIP"|"$DSTPORT-$PROTO"|"$ACTION"|40|"$SUCCE"|"$COLOR"|0|0|"$DSTINAIP"|PID"
+echo $ZEITSTEMPEL"|"$SOURCEIP"|"$DSTPORT-$PROTO"|"$ACTION"|"$SIZE"|"$SUCCE"|"$COLOR"|0|0|"$DSTINAIP"|PID"
  }
 
 if [ -p /dev/stdin ]; then
