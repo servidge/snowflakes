@@ -1,9 +1,15 @@
 // Including the ESP8266 WiFi library
 #include <ESP8266WiFi.h>
+#define DEBUG_PRINT 0 //0=aus
+#define SYSLOG 1
 
+int LEDPIN = 13; //GPIO-D7 NodeMCU
 // Replace with your network details
 const char* ssid = "SSID-SSID";
 const char* password = "PSK-PSK";
+
+//Bonjour
+#include <ESP8266mDNS.h>
 
 // Web Server on port 80
 WiFiServer server(80);
@@ -19,13 +25,34 @@ char temperatureDS18B20String[6];
 float getDS18B20Temperature() {
   float temp;
   do {
+    digitalWrite(LEDPIN, HIGH);
     DS18B20.requestTemperatures();
     temp = DS18B20.getTempCByIndex(0);
     delay(100);
-  } while (temp == 85.0 || temp == (-127.0));
+  } while (temp == 85.12 || temp == (-127.0));
+  digitalWrite(LEDPIN, LOW);
   return temp;
 }
 
+#include <WiFiUdp.h>
+WiFiUDP udp;
+unsigned int localPort = 2390;
+IPAddress syslogServer(192, 168, 30, 16);
+void sendUdpSyslog(String msgtosend)
+{
+  unsigned int msg_length = msgtosend.length();
+  byte* p = (byte*)malloc(msg_length);
+  memcpy(p, (char*) msgtosend.c_str(), msg_length);
+
+  udp.beginPacket(syslogServer, 514);
+  //udp.write("esp8266-02-syslog ");
+  udp.write(WiFi.localIP());
+  udp.write("|");
+  udp.write(p, msg_length);
+  udp.endPacket();
+  free(p);
+}
+String MELDUNG;
 
 // only runs once on boot
 void setup() {
@@ -33,60 +60,128 @@ void setup() {
   Serial.begin(115200);
   delay(10);
 
+  pinMode(LEDPIN, OUTPUT);
+  digitalWrite(LEDPIN, HIGH);
+
   // Connecting to WiFi network
-  Serial.println();
-  Serial.print("Connecting to ");
-  Serial.println(ssid);
+  if (DEBUG_PRINT) {
+    Serial.println();
+    Serial.print("Connecting to ");
+    Serial.println(ssid);
+  }
 
 
+  int Attempt = 0;
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
+    Attempt++;
+    //if (DEBUG_PRINT) {
     Serial.print(".");
+    //}
+    if (Attempt == 200)
+    {
+      Serial.print("ESP Restart");
+      ESP.restart();
+    }
   }
-
-  Serial.println("");
-  Serial.println("WiFi connected");
-
+  if (DEBUG_PRINT) {
+    Serial.println("");
+    Serial.println("WiFi connected");
+  }
   // Starting the web server
   delay(5000);
-  // Printing the ESP IP address
-  Serial.println(WiFi.localIP());
-  Serial.println("Connected.");
-  Serial.print("MAC Addr: ");
-  Serial.println(WiFi.macAddress());
-  Serial.print("IP Addr:  ");
-  Serial.println(WiFi.localIP());
-  Serial.print("Subnet:   ");
-  Serial.println(WiFi.subnetMask());
-  Serial.print("Gateway:  ");
-  Serial.println(WiFi.gatewayIP());
-  Serial.print("DNS Addr: ");
-  Serial.println(WiFi.dnsIP());
-  Serial.print("Channel:  ");
-  Serial.println(WiFi.channel());
-  Serial.print("Status: ");
-  Serial.println(WiFi.status());
-
+  if (DEBUG_PRINT) {
+    // Printing the ESP IP address
+    Serial.println(WiFi.localIP());
+    Serial.println("Connected.");
+    Serial.print("MAC Addr: ");
+    Serial.println(WiFi.macAddress());
+    Serial.print("IP Addr:  ");
+    Serial.println(WiFi.localIP());
+    Serial.print("Subnet:   ");
+    Serial.println(WiFi.subnetMask());
+    Serial.print("Gateway:  ");
+    Serial.println(WiFi.gatewayIP());
+    Serial.print("DNS Addr: ");
+    Serial.println(WiFi.dnsIP());
+    Serial.print("Channel:  ");
+    Serial.println(WiFi.channel());
+    Serial.print("Status: ");
+    Serial.println(WiFi.status());
+  }
+  digitalWrite(LEDPIN, LOW);
   server.begin();
-  Serial.println("Web server running. Waiting for Clients");
+  delay(1000);
+  digitalWrite(LEDPIN, HIGH);
+  delay(1000);
+  digitalWrite(LEDPIN, LOW);
+  delay(1000);
+  digitalWrite(LEDPIN, HIGH);
+  delay(1000);
+  digitalWrite(LEDPIN, LOW);
+
+  if (DEBUG_PRINT) {
+    Serial.println("Web server running. Waiting for Clients");
+  }
+  if (SYSLOG) {
+    sendUdpSyslog("SYSTEMSTART");
+  }
+
+  if (!MDNS.begin("esp8266-tempserver")) {
+    Serial.println("Error setting up MDNS responder!");
+    while (1) {
+      delay(1000);
+    }
+  }
+  if (DEBUG_PRINT) {
+    Serial.println("mDNS responder started");
+  }
+
+  // Add service to MDNS-SD
+  MDNS.addService("http", "tcp", 80);
+
+  Serial.print("IP Addr: ");
+  Serial.println(WiFi.localIP());
 }
 
 
+unsigned long previousMillis = 0;
+int interval = 60000;
+
 // runs over and over again
-
 void loop() {
-  WiFiClient client = server.available();   // Listen for incoming clients
+  unsigned long currentMillis = millis();
+  if ((unsigned long)(currentMillis - previousMillis) >= interval) {
 
+    // It's time to do something! do some task here, or trigger some flags, etc
+    float DS18B20temperature = getDS18B20Temperature();
+    dtostrf(DS18B20temperature, 2, 2, temperatureDS18B20String);
+    MELDUNG = "{\"Conuter\":\"";
+    MELDUNG += counter;
+    MELDUNG += "\",\"Temperatur\":\"";
+    MELDUNG += temperatureDS18B20String;
+    MELDUNG += "\"\}";
+    sendUdpSyslog(MELDUNG);
+    counter = counter + 1;
+    previousMillis = currentMillis;
+  }
+
+
+  WiFiClient client = server.available();   // Listen for incoming clients
   if (client) {                             // If a new client connects,
     String remote_ip = client.remoteIP().toString(); // IP Adresse des Client
-    Serial.println("Neuer Zugriff von : " + remote_ip);
+    if (DEBUG_PRINT) {
+      Serial.println("Neuer Zugriff von : " + remote_ip);
+    }
     String currentLine = "";                
     while (client.connected()) {            
       if (client.available()) {             
         char c = client.read();             
-        Serial.write(c);                    
+        if (DEBUG_PRINT) {
+          Serial.write(c);
+        }
         header += c;
         if (c == '\n') {                    
           if (currentLine.length() == 0) {
@@ -98,7 +193,9 @@ void loop() {
           float DS18B20temperature = getDS18B20Temperature();
           dtostrf(DS18B20temperature, 2, 2, temperatureDS18B20String);
             if (header.indexOf("GET /kurz") >= 0) {
-              Serial.println("Seite Kurz");
+              if (DEBUG_PRINT) {
+                Serial.println("Seite Kurz");
+              }
               //client.println("<!DOCTYPE html><html>");
               //client.print("<body>");
               client.print(counter);
@@ -107,7 +204,9 @@ void loop() {
               //client.println("</body></html>");
             }
             else if (header.indexOf("GET /json") >= 0) {
-              Serial.println("Seite json");
+              if (DEBUG_PRINT) {
+                Serial.println("Seite json");
+              }
               client.print("{\"Conuter\":\"");
               client.print(counter);
               client.print("\",\"Temperatur\":\"");
@@ -115,7 +214,10 @@ void loop() {
               client.print("\"\}");
             }
             else {
-              Serial.println("Seite Normal ");
+              if (DEBUG_PRINT) {
+                Serial.println("Seite Normal ");
+              }
+              // Display the HTML web page
               client.println("<!DOCTYPE html><html>");
               client.println("<head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">");
               client.println("<style>html { font-family: Helvetica; display: inline-block; margin: 0px auto; text-align: center;}");
@@ -143,11 +245,16 @@ void loop() {
         }
       }
     }
-    header = "";
-    Serial.println(counter);
+        header = "";
+    if (DEBUG_PRINT) {
+      Serial.println(counter);
+    }
     counter = counter + 1;
     client.stop();
-    Serial.println("Client disconnected.");
-    Serial.println("");
+    if (DEBUG_PRINT) {
+      Serial.println("Client disconnected.");
+      Serial.println("");
+    }
   }
 }
+
