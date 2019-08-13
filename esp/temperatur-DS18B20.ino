@@ -192,7 +192,31 @@ void loop() {
           //Temperator holen
           float DS18B20temperature = getDS18B20Temperature();
           dtostrf(DS18B20temperature, 2, 2, temperatureDS18B20String);
-            if (header.indexOf("GET /kurz") >= 0) {
+            if (header.indexOf("GET /cmVib290/yes") >= 0) {
+              if (DEBUG_PRINT) {
+                Serial.println("reboot yes");
+              }
+              client.println("<!DOCTYPE html><html>");
+              client.print("<body>");
+              client.print("OK - Reboot");
+              client.println("</body></html>");
+              if (DEBUG_PRINT) {
+                Serial.print("ESP Restart");
+              }
+              ESP.restart();
+            }
+            else if ( (header.indexOf("GET /reboot") >= 0) || (header.indexOf("GET /reload") >= 0) || (header.indexOf("GET /restart") >= 0) )  {
+              if (DEBUG_PRINT) {
+                Serial.println("reboot ???");
+              }
+              client.println("<!DOCTYPE html><html>");
+              client.print("<body>");
+              client.println("Reboot Device");
+              client.println("<p><a href=\"/\"><button class=\"button\">NO</button></a></p>");
+              client.println("<p><a href=\"/cmVib290/yes\"><button class=\"button\">YES</button></a></p>");
+              client.println("</body></html>");
+            }
+            else if ( (header.indexOf("GET /kurz") >= 0) || (header.indexOf("GET /short") >= 0) ) {
               if (DEBUG_PRINT) {
                 Serial.println("Seite Kurz");
               }
@@ -212,6 +236,48 @@ void loop() {
               client.print("\",\"Temperatur\":\"");
               client.print(temperatureDS18B20String);
               client.print("\"\}");
+            }
+            else if (header.indexOf("GET /status") >= 0) {
+              if (DEBUG_PRINT) {
+                Serial.println("Seite status");
+              }
+              client.println("<!DOCTYPE html><html>");
+              client.print("<body>");
+              client.print("SSID: ");
+              client.println(WiFi.SSID());
+              client.println(" </p>");
+              client.print("Signal staerke (RSSI) dbm: ");
+              client.println(WiFi.RSSI());       
+              client.println(" </p>");     
+              client.print("Channel:  ");
+              client.println(WiFi.channel());
+              client.println(" </p>");
+              client.print("Status: ");
+              client.println(WiFi.status());
+              client.println(" </p>");
+              client.print("MAC Addr: ");
+              client.println(WiFi.macAddress());
+              client.println(" </p>");
+              client.print("IP Addr:  ");
+              client.println(WiFi.localIP());
+              client.println(" </p>");
+              client.print("Subnet:   ");
+              client.println(WiFi.subnetMask());
+              client.println(" </p>");
+              client.print("Gateway:  ");
+              client.println(WiFi.gatewayIP());
+              client.println(" </p>");
+              client.print("DNS Addr: ");
+              client.println(WiFi.dnsIP());
+              client.println(" </p>");
+              client.println(" </p>");
+              client.print("Conuter: ");
+              client.println(counter);
+              client.println(" </p>");
+              client.print("Temperatur: ");
+              client.println(temperatureDS18B20String);
+              client.println(" </p>");
+              client.println("</body></html>");              
             }
             else {
               if (DEBUG_PRINT) {
