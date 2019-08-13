@@ -10,6 +10,12 @@ const char* password = "PSK-PSK";
 
 //Bonjour
 #include <ESP8266mDNS.h>
+String makeMDNSnameUnq(const char *Template)
+{
+  uint16_t uChipId = ESP.getChipId();
+  String Result = String(Template) + String(uChipId, HEX);
+  return Result;
+}
 
 // Web Server on port 80
 WiFiServer server(80);
@@ -129,7 +135,8 @@ void setup() {
     sendUdpSyslog("SYSTEMSTART");
   }
 
-  if (!MDNS.begin("esp8266-tempserver")) {
+  String mdnshostname = makeMDNSnameUnq("TempSensor-"); 
+  if (!MDNS.begin(mdnshostname.c_str())) {
     Serial.println("Error setting up MDNS responder!");
     while (1) {
       delay(1000);
@@ -168,6 +175,7 @@ void loop() {
     previousMillis = currentMillis;
   }
 
+  MDNS.update();
 
   WiFiClient client = server.available();   // Listen for incoming clients
   if (client) {                             // If a new client connects,
@@ -214,6 +222,16 @@ void loop() {
               client.println("Reboot Device");
               client.println("<p><a href=\"/\"><button class=\"button\">NO</button></a></p>");
               client.println("<p><a href=\"/cmVib290/yes\"><button class=\"button\">YES</button></a></p>");
+              client.println("</body></html>");
+            }
+            else if (header.indexOf("GET /led/on") >= 0) {
+              if (DEBUG_PRINT) {
+                Serial.println("led on");
+              }
+              digitalWrite(LEDPIN, HIGH);
+              client.println("<!DOCTYPE html><html>");
+              client.println("<body><h1>LED On</h1>");
+              client.println("till next poll");
               client.println("</body></html>");
             }
             else if ( (header.indexOf("GET /kurz") >= 0) || (header.indexOf("GET /short") >= 0) ) {
