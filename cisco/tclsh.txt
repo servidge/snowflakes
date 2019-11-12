@@ -1,0 +1,7 @@
+# tclsh snippets um Kleinkram zu erledigen
+# tclsh botches to solve trivia problems
+# 
+# Part of https://github.com/servidge/snowflakes
+# дцья
+# 
+# 
