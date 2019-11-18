@@ -1,7 +1,87 @@
 # tclsh snippets um Kleinkram zu erledigen
 # tclsh botches to solve trivia problems
-# 
 # Part of https://github.com/servidge/snowflakes
-# ‰ˆ¸ﬂ
+# √§√∂√º√ü
 # 
 # 
+
+! grunds√§tzlich
+! in general
+puts = Print stuff
+ios_config = configure stuff
+
+
+router#tclsh
+...
+router(tcl)#
+
+
+router#tclsh
+router(tcl)#ios_config "interface gi0/1" "speed 100" "duplex full"
+router(tcl)#
+
+
+! Sammel ping an alle hosts
+! batch Ping all hosts
+foreach ip {
+172.16.1.1
+172.16.1.2
+172.16.1.3
+172.16.1.4
+} { puts [ exec "ping $ip" ] }  
+
+
+! Alle interfaces snmp linkstatus deaktivieren
+! Disable on all interfaces snmp linkstatus
+set ports [exec sh int des ]
+foreach line [split $ports "\n"] {
+  if [regexp {^([A-Za-z/\:0-9]+)\s+} $line match port] {
+  puts $port
+  ios_config "interface $port" "no snmp trap link-status "
+  }
+}
+
+
+! alle down/down Ports sperren
+! disable all down / down ports
+set ports [exec sh int description | i down           down ]
+foreach line [split $ports "\n"] {
+  if [regexp {^([A-Za-z/\:0-9]+)\s+} $line match port] {
+  puts $port
+  ios_config "interface $port" "shutdown"
+  }
+}
+
+
+! Alle interfaces konfigurieren
+! Configure all interfaces
+set ports [exec sh int des ]
+foreach line [split $ports "\n"] {
+  if [regexp {^([A-Za-z/\:0-9]+)\s+} $line match port] {
+  puts $port
+  ios_config "interface $port" "load-interval 30" "no ip directed-broadcast" "no ip proxy-arp" "no snmp trap link-status "
+  }
+}
+
+
+! ip-sla zu allen IP Schnittstellen zu bestimmten hosts konfigurieren
+! Configure ip-sla to all interfaces to specific hosts
+! https://www.reddit.com/r/Cisco/comments/drj5q4/eem_or_tcl_ping_with_variable/
+tclsh 
+set intbrief [exec {sh ip int brief | i 0/0/2.}]
+set ipsla 10
+foreach line [split $intbrief "\n"] {
+regexp {(\d+\.){2}\d+} $line ipnetwork 
+for {set io 7} {$io <= 11} {incr io} {
+ios_config "ip sla $ipsla$io" "icmp-echo $ipnetwork.$io" "frequency 60"  "ip sla schedule $ipsla$io life forever start-time now"
+}
+incr ipsla 10
+}
+
+
+! Datei im flash speichern. bsp flash:filename
+! Save file in flash. eg flash:filename
+puts [open "flash:filename" w+] {
+<< Inhalt einf√ºgen | Paste Input >>
+}
+
