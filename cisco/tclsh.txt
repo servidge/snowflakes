@@ -12,8 +12,10 @@ ios_config = configure stuff
 
 
 router#tclsh
-...
 router(tcl)#
+...
+router(tcl)#tclquit
+router#
 
 
 router#tclsh
@@ -84,4 +86,17 @@ incr ipsla 10
 puts [open "flash:filename" w+] {
 << Inhalt einfügen | Paste Input >>
 }
+
+
+! $variable in flash speichern. bsp flash:filename
+! Save $variable to flash. eg flash:filename
+set writefile [open "flash:$filename" w+]
+puts $writefile "$variable\r"
+close $writefile
+
+
+! Hostname ermitteln und als Variable verwenden
+! get the host name and use it as a variable
+set FINDROUTERNAME [exec "show running-config | i ^hostname"]
+set ROUTERNAME [string trim [lindex [split $FINDROUTERNAME " "] 1]]
 
