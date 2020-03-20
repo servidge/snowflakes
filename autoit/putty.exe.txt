@@ -1,0 +1,5 @@
+Putty.exe hier hinlegen
+Place Putty.exe here
+
+Putty gibt es hier https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html
+get putty from here https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html

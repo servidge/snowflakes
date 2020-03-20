@@ -1,0 +1,5 @@
+WinDump.exe hier hinlegen
+Place WinDump.exe here
+
+WinDump.exe gibt es hier https://www.winpcap.org/windump/install/default.htm
+get WinDump.exe from here https://www.winpcap.org/windump/install/default.htm
