@@ -2,15 +2,15 @@
 #RequireAdmin
 #Region ;**** Directives created by AutoIt3Wrapper_GUI ****
 #AutoIt3Wrapper_Icon=icon.ico
-#AutoIt3Wrapper_Outfile=WinMDNSv2.exe
+#AutoIt3Wrapper_Outfile=K-Disco.exe
 #AutoIt3Wrapper_Compression=3
 #AutoIt3Wrapper_Res_Description=mDNS Zeroconf Receiver-pcap
 #AutoIt3Wrapper_Res_Fileversion=0.0.2.0
 #AutoIt3Wrapper_Res_LegalCopyright=Sebastian Bönning 2020
 #AutoIt3Wrapper_Res_requestedExecutionLevel=requireAdministrator
-#AutoIt3Wrapper_Res_Field=ProductName|WinMDNSv2
-#AutoIt3Wrapper_Res_Field=ProductVersion|2.0
-#AutoIt3Wrapper_Res_Field=OriginalFileName|WinMDNSv2.exe
+#AutoIt3Wrapper_Res_Field=ProductName|K-Disco
+#AutoIt3Wrapper_Res_Field=ProductVersion|2.1
+#AutoIt3Wrapper_Res_Field=OriginalFileName|K-Disco.exe
 #AutoIt3Wrapper_Run_AU3Check=n
 #AutoIt3Wrapper_AU3Check_Parameters=-d -w 1 -w 2 -w 3 -w 4 -w 5 -w 6
 ; Winpcap autoit3 UDF demo - V1.2c
@@ -29,9 +29,10 @@
 #include <StaticConstants.au3>
 #include <ComboConstants.au3>
 #include <Winpcap.au3>
-$VER = "2.0"
+#include <ColorConstants.au3>
+$VER = "2.1"
 $MACMARKER="B8:27:EB:"
-$WinMDNSVer = "WinMDNS - v"& $VER &" - Sebastian Bönning - 2019-" & @YEAR
+$WinMDNSVer = "K-Disco - v"& $VER &" - Sebastian Bönning - 2019-" & @YEAR
 $winpcap = _PcapSetup()
 If ($winpcap = -1) Then
 	FileInstall("npcap-0.9987.exe", @TempDir & '\', 1)
@@ -52,8 +53,8 @@ EndIf
 
 FileInstall("Putty.exe", @TempDir & '\', 1)
 
-GUICreate("Packet capture", 650, 400)
-Global $ComboInterface = GUICtrlCreateCombo("", 80, 15, 555, Default, $CBS_DROPDOWNLIST)
+GUICreate("Packet capture", 650, 500)
+Global $ComboInterface = GUICtrlCreateCombo("", 80, 13, 555, Default, $CBS_DROPDOWNLIST)
 GUICtrlSetTip(-1, "Available input sources")
 GUICtrlSetData(-1, "Pcap capture file")
 For $i = 0 To UBound($pcap_devices) - 1
@@ -62,44 +63,47 @@ For $i = 0 To UBound($pcap_devices) - 1
 Next
 
 GUICtrlSetStyle(GUICtrlCreateLabel("IP:", 10, 40, 90), $SS_RIGHT)
-$IP = GUICtrlCreateInput("", 100, 40, 535)
+$IP = GUICtrlCreateInput("", 100, 38, 535)
 GUICtrlSetTip(-1, "Erste IP address auf Port")
 
-GUICtrlSetStyle(GUICtrlCreateLabel("MAC:", 10, 60, 90), $SS_RIGHT)
-$MAC = GUICtrlCreateInput("", 100, 60, 535)
+GUICtrlSetStyle(GUICtrlCreateLabel("MAC:", 10, 65, 90), $SS_RIGHT)
+$MAC = GUICtrlCreateInput("", 100, 62, 535)
 GUICtrlSetTip(-1, "MAC des Port")
 
-
-GUICtrlSetStyle(GUICtrlCreateLabel("Filter:", 10, 80, 90), $SS_RIGHT)
-$filter = GUICtrlCreateInput("host 224.0.0.251 and port 5353", 100, 80, 535)
-
+GUICtrlSetStyle(GUICtrlCreateLabel("Filter:", 10, 90, 90), $SS_RIGHT)
+$filter = GUICtrlCreateInput("host 224.0.0.251 and port 5353", 100, 88, 535, -1)
 GUICtrlSetTip(-1, "Filter to apply to packets")
 
-GUICtrlSetStyle(GUICtrlCreateLabel("SSH Username:", 10, 100, 90), $SS_RIGHT)
-$USERNAME=GUICtrlCreateInput("admin", 100, 100, 535)
+GUICtrlSetStyle(GUICtrlCreateLabel("MAC Highlight:", 10, 115, 90), $SS_RIGHT)
+$MACHIGH=GUICtrlCreateInput("00:90:B8:", 100, 113, 535)
+GUICtrlSetTip(-1, "MAC Adresse für Highlight")
+
+GUICtrlSetStyle(GUICtrlCreateLabel("SSH Username:", 10, 140, 90), $SS_RIGHT)
+$USERNAME=GUICtrlCreateInput("admin", 100, 138, 535)
 GUICtrlSetTip(-1, "Username fuer SSH Verbindung")
 
 
 ;$packetwindow = GUICtrlCreateListView("Nr|Time|Len|L2|L3-Packet", 10, 130, 570, 200)
-$packetwindow = GUICtrlCreateListView("Nr|Time|Len|L2|L3-Packet", 10, 130, 630, 200)
+$packetwindow = GUICtrlCreateListView("Nr|Time|Len|L2|L3-Packet|Payload", 10, 160, 630, 270)
 _GUICtrlListView_SetColumn($packetwindow, 0, "Nr", 40, 1)
 _GUICtrlListView_SetColumnWidth($packetwindow, 1, 80)
 _GUICtrlListView_SetColumn($packetwindow, 2, "Len", 40, 1)
 _GUICtrlListView_SetColumnWidth($packetwindow, 3, 180)
 _GUICtrlListView_SetColumnWidth($packetwindow, 4, 330)
 
-;$promiscuous = GUICtrlCreateCheckbox("promiscuous", 400, 45)
-$start = GUICtrlCreateButton("Start", 20, 340, 60)
-$stop = GUICtrlCreateButton("Stop", 110, 340, 60)
+$start = GUICtrlCreateButton("Start", 20, 440, 60)
+$stop = GUICtrlCreateButton("Stop", 110, 440, 60)
 GUICtrlSetState(-1, $GUI_DISABLE)
-$clear = GUICtrlCreateButton("Clear", 200, 340, 60)
-$stats = GUICtrlCreateButton("Stats", 290, 340, 60)
-$StartSSH = GUICtrlCreateButton("SSH auf IP", 380, 340, 260)
+$clear = GUICtrlCreateButton("Clear", 200, 440, 60)
+$stats = GUICtrlCreateButton("Stats", 290, 440, 60)
+$StartSSH = GUICtrlCreateButton("SSH auf IP", 380, 440, 260)
 GUICtrlSetState(-1, $GUI_DISABLE)
 ;$save = GUICtrlCreateCheckbox("Save packets", 395, 340, 90, 30)
-GUICtrlSetStyle(GUICtrlCreateLabel("Interface:", 10, 20, 60), $SS_RIGHT)
 
-GUICtrlCreateLabel($WinMDNSVer, 10, 380, 250, 20)
+GUICtrlSetStyle(GUICtrlCreateLabel("Interface:", 10, 17, 60), $SS_RIGHT)
+
+$mailto = GUICtrlCreateLabel($WinMDNSVer, 390, 480, 250, 20)
+GUICtrlSetColor($mailto, $COLOR_BLUE)
 
 GUISetState()
 
@@ -126,6 +130,13 @@ Do
 			Next
 	EndIf
 	If ($msg = $start) Then
+		If StringInStr(GUICtrlRead($ComboInterface), "Pcap capture file") <> 0 Then
+			$file = FileOpenDialog("Pcap file to open ?", ".", "Pcap (*.pcap)|All files (*.*)", 1)
+			If $file = "" Then ContinueLoop
+			$int = "file://" & $file
+		Else
+		EndIf
+		$MACMARKER=GUICtrlRead($MACHIGH)
 		$pcap = _PcapStartCapture($int, GUICtrlRead($filter), $prom)
 		If ($pcap = -1) Then
 			MsgBox(16, "Pcap error !", _PcapGetLastError())
@@ -142,7 +153,9 @@ Do
 		GUICtrlSetState($StartSSH , $GUI_DISABLE)
 		;GUICtrlSetState($save, $GUI_DISABLE)
 	EndIf
-
+	If ($msg = $mailto) Then
+		ShellExecute("mailto:sebastian.boenning@localhost?subject=Feedback%20zu%20K-Disco")
+	EndIf
 	If ($msg = $stop) Then
 		If IsPtr($pcapfile) Then
 			_PcapStopCaptureFile($pcapfile)
@@ -181,7 +194,8 @@ Do
 			$payload = MyDissector($packet[3])
 			GUICtrlCreateListViewItem($i & "|" & StringTrimRight($packet[0], 4) & "|" & $packet[2] & "|" & $payload, $packetwindow)
 			;MsgBox(0, "Result", $payload)
-			if StringLeft($payload, 9) = $MACMARKER Then
+
+			if StringLeft($payload, StringLen($MACMARKER)) = $MACMARKER Then
 				;MsgBox(0, "Result", "String startet mit 00:90:B8:")
 				GUICtrlSetBkColor(-1,0xff0000)
 			EndIf
