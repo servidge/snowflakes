@@ -1,0 +1,7 @@
+npcap-0.9987.exe hier hinlegen
+Place npcap-0.9987.exe here
+
+npcap-0.9987.exe gibt es hier https://nmap.org/npcap/dist/npcap-0.9989.exe
+get npcap-0.9987.exe from here https://nmap.org/npcap/dist/npcap-0.9989.exe
+
+info https://nmap.org/npcap/

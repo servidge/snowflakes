@@ -20,7 +20,11 @@
 
 $winpcap = _PcapSetup()
 If ($winpcap = -1) Then
-	MsgBox(16, "Pcap error !", "WinPcap not found !")
+	FileInstall("npcap-0.9987.exe", @TempDir & '\', 1)
+	MsgBox(16, "Pcap Fehler !", "WinPcap oder " & @CRLF & "Npcap Treiber in WinPcap API Mode" & @CRLF & "nicht gefunden!" &  @CRLF &  @CRLF & "Bitte passend installieren und Programm neu starten. Danke!" &  @CRLF & "Installation von Npcap 0.9987 wird gestartet. " )
+	$sPath = @TempDir & '\npcap-0.9987.exe'
+	ShellExecute($sPath, ' /winpcap_mode=yes')
+	FileDelete(@TempDir & "\npcap-0.9987.exe")
 	Exit
 EndIf
 
@@ -44,7 +48,6 @@ Next
 GUICtrlSetStyle(GUICtrlCreateLabel("IP:", 10, 40, 90), $SS_RIGHT)
 $IP = GUICtrlCreateInput("", 100, 40, 330)
 GUICtrlSetTip(-1, "Erste IP address auf Port")
-
 
 GUICtrlSetStyle(GUICtrlCreateLabel("MAC:", 10, 60, 90), $SS_RIGHT)
 $MAC = GUICtrlCreateInput("", 100, 60, 330)
@@ -117,14 +120,6 @@ Do
 			MsgBox(16, "Pcap error !", "This example only works for Ethernet captures")
 			ContinueLoop
 		EndIf
-		;If GUICtrlRead($save) = $GUI_CHECKED Then
-		;	$file = FileSaveDialog("Pcap file to write to ?", ".", "Pcap (*.pcap)", 16)
-		;	If ($file <> "") Then
-		;		If StringLower(StringRight($file, 5)) <> ".pcap" Then $file &= ".pcap"
-		;		$pcapfile = _PcapSaveToFile($pcap, $file)
-		;		If ($pcapfile = 0) Then MsgBox(16, "Pcap error !", _PcapGetLastError())
-		;	EndIf
-		;EndIf
 		GUICtrlSetState($stop, $GUI_ENABLE)
 		GUICtrlSetState($stats, $GUI_ENABLE)
 		GUICtrlSetState($start, $GUI_DISABLE)
@@ -236,6 +231,7 @@ EndFunc   ;==>MyDissector
 Func OnExit()
 	If ProcessExists("Putty.exe") Then ProcessClose("Putty.exe")
 	FileDelete(@TempDir & "\Putty.exe")
+	FileDelete(@TempDir & "\npcap-0.9987.exe")
 EndFunc
 
 
