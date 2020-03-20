@@ -53,7 +53,7 @@ EndIf
 
 FileInstall("Putty.exe", @TempDir & '\', 1)
 
-GUICreate("Packet capture", 650, 500)
+GUICreate("K-Disco - Packet capture", 650, 500)
 Global $ComboInterface = GUICtrlCreateCombo("", 80, 13, 555, Default, $CBS_DROPDOWNLIST)
 GUICtrlSetTip(-1, "Available input sources")
 GUICtrlSetData(-1, "Pcap capture file")
@@ -98,8 +98,7 @@ $clear = GUICtrlCreateButton("Clear", 200, 440, 60)
 $stats = GUICtrlCreateButton("Stats", 290, 440, 60)
 $StartSSH = GUICtrlCreateButton("SSH auf IP", 380, 440, 260)
 GUICtrlSetState(-1, $GUI_DISABLE)
-;$save = GUICtrlCreateCheckbox("Save packets", 395, 340, 90, 30)
-
+GUICtrlSetState($StartSSH , $GUI_DISABLE)
 GUICtrlSetStyle(GUICtrlCreateLabel("Interface:", 10, 17, 60), $SS_RIGHT)
 
 $mailto = GUICtrlCreateLabel($WinMDNSVer, 390, 480, 250, 20)
@@ -150,7 +149,6 @@ Do
 		GUICtrlSetState($stop, $GUI_ENABLE)
 		GUICtrlSetState($stats, $GUI_ENABLE)
 		GUICtrlSetState($start, $GUI_DISABLE)
-		GUICtrlSetState($StartSSH , $GUI_DISABLE)
 		;GUICtrlSetState($save, $GUI_DISABLE)
 	EndIf
 	If ($msg = $mailto) Then
@@ -197,7 +195,7 @@ Do
 
 			if StringLeft($payload, StringLen($MACMARKER)) = $MACMARKER Then
 				;MsgBox(0, "Result", "String startet mit 00:90:B8:")
-				GUICtrlSetBkColor(-1,0xff0000)
+				GUICtrlSetBkColor(-1,0x80ff00)
 			EndIf
 			
 			$data = $packet[3]
