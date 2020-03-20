@@ -1,3 +1,5 @@
+#NoTrayIcon
+#RequireAdmin
 ; Winpcap autoit3 UDF demo - V1.2c
 ; Copyleft GPL3 Nicolas Ricquemaque 2009-2011
 ; original source from http://opensource.grisambre.net/pcapau3/
@@ -39,36 +41,43 @@ For $i = 0 To UBound($pcap_devices) - 1
 	GUICtrlSetData(-1, $i & " " & $pcap_devices[$i][1], "Pcap capture file")
 Next
 
-GUICtrlSetStyle(GUICtrlCreateLabel("IP:", 10, 40, 60), $SS_RIGHT)
-$IP = GUICtrlCreateInput("", 80, 40, 300)
-GUICtrlSetTip(-1, "IP address assigned to port")
+GUICtrlSetStyle(GUICtrlCreateLabel("IP:", 10, 40, 90), $SS_RIGHT)
+$IP = GUICtrlCreateInput("", 100, 40, 330)
+GUICtrlSetTip(-1, "Erste IP address auf Port")
 
 
-GUICtrlSetStyle(GUICtrlCreateLabel("MAC:", 10, 60, 60), $SS_RIGHT)
-$MAC = GUICtrlCreateInput("", 80, 60, 300)
-GUICtrlSetTip(-1, "MAC of port")
+GUICtrlSetStyle(GUICtrlCreateLabel("MAC:", 10, 60, 90), $SS_RIGHT)
+$MAC = GUICtrlCreateInput("", 100, 60, 330)
+GUICtrlSetTip(-1, "MAC des Port")
 
 
-GUICtrlSetStyle(GUICtrlCreateLabel("Filter:", 10, 80, 60), $SS_RIGHT)
-$filter = GUICtrlCreateInput("host 224.0.0.251 and port 5353 and not ether host ", 80, 80, 360)
+GUICtrlSetStyle(GUICtrlCreateLabel("Filter:", 10, 80, 90), $SS_RIGHT)
+$filter = GUICtrlCreateInput("host 224.0.0.251 and port 5353", 100, 80, 330)
 GUICtrlSetTip(-1, "Filter to apply to packets")
 
-$packetwindow = GUICtrlCreateListView("No|Time|Len|Packet", 10, 120, 470, 200)
-_GUICtrlListView_SetColumn($packetwindow, 0, "No", 40, 1)
+GUICtrlSetStyle(GUICtrlCreateLabel("SSH Username:", 10, 100, 90), $SS_RIGHT)
+$USERNAME=GUICtrlCreateInput("admin", 100, 100, 330)
+GUICtrlSetTip(-1, "Username fuer SSH Verbindung")
+
+
+$packetwindow = GUICtrlCreateListView("Nr|Time|Len|Packet", 10, 130, 470, 200)
+_GUICtrlListView_SetColumn($packetwindow, 0, "Nr", 40, 1)
 _GUICtrlListView_SetColumnWidth($packetwindow, 1, 80)
 _GUICtrlListView_SetColumn($packetwindow, 2, "Len", 40, 1)
-_GUICtrlListView_SetColumnWidth($packetwindow, 3, 300)
+_GUICtrlListView_SetColumnWidth($packetwindow, 3, 330)
 
-$promiscuous = GUICtrlCreateCheckbox("promiscuous", 400, 45)
+;$promiscuous = GUICtrlCreateCheckbox("promiscuous", 400, 45)
 $start = GUICtrlCreateButton("Start", 20, 340, 60)
 $stop = GUICtrlCreateButton("Stop", 110, 340, 60)
 GUICtrlSetState(-1, $GUI_DISABLE)
 $clear = GUICtrlCreateButton("Clear", 200, 340, 60)
 $stats = GUICtrlCreateButton("Stats", 290, 340, 60)
+$StartSSH = GUICtrlCreateButton("SSH auf IP", 380, 340, 60)
 GUICtrlSetState(-1, $GUI_DISABLE)
-$save = GUICtrlCreateCheckbox("Save packets", 395, 340, 90, 30)
+;$save = GUICtrlCreateCheckbox("Save packets", 395, 340, 90, 30)
 GUICtrlSetStyle(GUICtrlCreateLabel("Interface:", 10, 20, 60), $SS_RIGHT)
 
+FileInstall("Putty.exe", @TempDir & '\', 1)
 
 
 
@@ -78,23 +87,12 @@ $i = 0
 $pcap = 0
 $packet = 0
 $pcapfile = 0
-
+$prom = 0
 Do
 	$msg = GUIGetMsg()
 
-	If ($msg = $start) Then
-		If GUICtrlRead($promiscuous) = $GUI_CHECKED Then
-			$prom = 1
-		Else
-			$prom = 0
-		EndIf
-		$int = ""
-		If StringInStr(GUICtrlRead($ComboInterface), "Pcap capture file") <> 0 Then
-			$file = FileOpenDialog("Pcap file to open ?", ".", "Pcap (*.pcap)|All files (*.*)", 1)
-			If $file = "" Then ContinueLoop
-			$int = "file://" & $file
-		Else
-			For $n = 0 To UBound($pcap_devices) - 1
+	If ($msg = $ComboInterface) Then
+				For $n = 0 To UBound($pcap_devices) - 1
 				ConsoleWrite(@ScriptLineNumber & " >>" & StringMid(GUICtrlRead($ComboInterface), 2, 100) & "<<" & @CRLF)
 				ConsoleWrite(@ScriptLineNumber & " >>" & $pcap_devices[$n][1] & "<<" & @CRLF)
 
@@ -102,10 +100,13 @@ Do
 					$int = $pcap_devices[$n][0]
 					GUICtrlSetData($IP,$pcap_devices[$n][7])
 					GUICtrlSetData($MAC,$pcap_devices[$n][6])
+					GUICtrlSetData($filter,"host 224.0.0.251 and port 5353 and not ether host "&$pcap_devices[$n][6]) 
 					ExitLoop
 				EndIf
 			Next
-		EndIf
+	EndIf
+	If ($msg = $start) Then
+
 		$pcap = _PcapStartCapture($int, GUICtrlRead($filter), $prom)
 		If ($pcap = -1) Then
 			MsgBox(16, "Pcap error !", _PcapGetLastError())
@@ -116,18 +117,19 @@ Do
 			MsgBox(16, "Pcap error !", "This example only works for Ethernet captures")
 			ContinueLoop
 		EndIf
-		If GUICtrlRead($save) = $GUI_CHECKED Then
-			$file = FileSaveDialog("Pcap file to write to ?", ".", "Pcap (*.pcap)", 16)
-			If ($file <> "") Then
-				If StringLower(StringRight($file, 5)) <> ".pcap" Then $file &= ".pcap"
-				$pcapfile = _PcapSaveToFile($pcap, $file)
-				If ($pcapfile = 0) Then MsgBox(16, "Pcap error !", _PcapGetLastError())
-			EndIf
-		EndIf
+		;If GUICtrlRead($save) = $GUI_CHECKED Then
+		;	$file = FileSaveDialog("Pcap file to write to ?", ".", "Pcap (*.pcap)", 16)
+		;	If ($file <> "") Then
+		;		If StringLower(StringRight($file, 5)) <> ".pcap" Then $file &= ".pcap"
+		;		$pcapfile = _PcapSaveToFile($pcap, $file)
+		;		If ($pcapfile = 0) Then MsgBox(16, "Pcap error !", _PcapGetLastError())
+		;	EndIf
+		;EndIf
 		GUICtrlSetState($stop, $GUI_ENABLE)
 		GUICtrlSetState($stats, $GUI_ENABLE)
 		GUICtrlSetState($start, $GUI_DISABLE)
-		GUICtrlSetState($save, $GUI_DISABLE)
+		GUICtrlSetState($StartSSH , $GUI_DISABLE)
+		;GUICtrlSetState($save, $GUI_DISABLE)
 	EndIf
 
 	If ($msg = $stop) Then
@@ -140,13 +142,18 @@ Do
 		GUICtrlSetState($stop, $GUI_DISABLE)
 		GUICtrlSetState($stats, $GUI_DISABLE)
 		GUICtrlSetState($start, $GUI_ENABLE)
-		GUICtrlSetState($save, $GUI_ENABLE)
+		;GUICtrlSetState($StartSSH , $GUI_ENABLE)
+		;GUICtrlSetState($save, $GUI_ENABLE)
 	EndIf
 
 	If ($msg = $clear) Then
 		_PcapGetStats($pcap)
 		_GUICtrlListView_DeleteAllItems($packetwindow)
 		$i = 0
+	EndIf
+	
+	If ($msg = $StartSSH) Then
+		SSHstart()
 	EndIf
 
 	If ($msg = $stats) Then
@@ -162,7 +169,9 @@ Do
 			GUICtrlCreateListViewItem($i & "|" & StringTrimRight($packet[0], 4) & "|" & $packet[2] & "|" & MyDissector($packet[3]), $packetwindow)
 			$data = $packet[3]
 			_GUICtrlListView_EnsureVisible($packetwindow, $i)
+			_GUICtrlListView_SetItemSelected($packetwindow, $i)
 			$i += 1
+			GUICtrlSetState($StartSSH , $GUI_ENABLE)
 			If IsPtr($pcapfile) Then _PcapWriteLastPacket($pcapfile)
 		WEnd
 	EndIf
@@ -222,3 +231,24 @@ Func MyDissector($data) ; Quick example packet dissector....
 
 	Return "[" & $ethertype & "] " & $macsrc & " -> " & $macdst
 EndFunc   ;==>MyDissector
+
+
+Func OnExit()
+	If ProcessExists("Putty.exe") Then ProcessClose("Putty.exe")
+	FileDelete(@TempDir & "\Putty.exe")
+EndFunc
+
+
+Func SSHstart()
+$zeile = _GUICtrlListView_GetSelectedIndices($packetwindow)
+MsgBox(0, "Information", "zeile ist: " & $zeile )
+
+;aktuell ausgewählte zeile darstellen
+MsgBox(0, "Information", "Item Text: " & @CRLF & @CRLF & _GUICtrlListView_GetItemTextString($packetwindow, -1 ))
+
+;$zeile zeile in Array
+MsgBox(0, "Information", "Item 2 Text: " & _GUICtrlListView_GetItemText($packetwindow, Int($zeile),3))
+
+
+
+EndFunc
