@@ -1,7 +1,7 @@
 #!/bin/bash
 # Idee Umsetzung vom Script von Sebastian Bönning
 # Abfrage der Eingebauten Module und deren Seriennummern
-VERSION="Version 0.3 vom 2021-03-25 10:00 Uhr"
+VERSION="Version 0.3 vom 2021-03-25 16:00 Uhr"
 
 DATUM=`/bin/date '+%Y%m%d-%H%M%S'`
 DAT=`/bin/date '+%Y-%m-%d'`
@@ -54,6 +54,7 @@ fi
 
 f_snmp_hostname () {
 HOSTNAME=`$SNMPDIR/snmpget -Onqv $SNMPCFG_SNMPRO "$1" $SNMPHOSTNAME`
+HOSTNAME=`echo $HOSTNAME | cut -d"." -f1 `
 }
 
 f_snmp_ifsuche () {
@@ -66,23 +67,46 @@ echo "Hostname; SNMPMODINDEX; SNMPMODTYP; SNMPMODUL-SNR; SNMPMODULNAME" > $TEMPD
 #HOSTUPTIME=`$SNMPDIR/snmpget -Otqv -v$SNMPVERSION -c$SNMPCOMMUNITYRO -t$SNMPTIMEOUTRO "$1" $SNMPUPTIME`
 while read line
 do 
-        #echo $line
-        SNMPMODINDEX=`echo $line | cut -d" " -f1 `
-        SNMPMODTYP=`echo $line | cut -d" " -f2 `
-        echo "# Prüfe auf $1 $SNMPMODTYP"
-        result0=`$SNMPDIR/snmpget -Onqv $SNMPCFG_SNMPRO  "$1" $SNMPMODULSNR$SNMPMODINDEX `
-        FEHLER=$?
-        if [[ "$FEHLER" != "0" ]] ; then 
-                        result0="Fehler:$FEHLER"
-        fi
-        result1=`$SNMPDIR/snmpget -Onqv $SNMPCFG_SNMPRO  "$1" $SNMPMODULNAME$SNMPMODINDEX `
-        FEHLER=$?
-        if [[ "$FEHLER" != "0" ]] ; then 
-                        result0="Fehler:$FEHLER"
-        fi
-                
-        echo $1"; "$HOSTNAME"; "$SNMPMODINDEX"; "$SNMPMODTYP"; "$result0"; "$result1"; "$result2"; " >> $TEMPDIR$1-$DATUM.temp2
-        echo $1"; "$HOSTNAME"; "$SNMPMODINDEX"; "$SNMPMODTYP"; "$result0"; "$result1"; "$result2"; "
+    #echo $line
+    SNMPMODINDEX=`echo $line | cut -d" " -f1 `
+    SNMPMODTYP=`echo $line | cut -d" " -f2 `
+
+    entPhysicalName=`$SNMPDIR/snmpget -Onqv $SNMPCFG_SNMPRO  "$1" $SNMPMODULPHYS.$SNMPMODINDEX | tr -d "\""`
+    FEHLER=$?
+    if [[ "$FEHLER" != "0" ]] ; then 
+        entPhysicalName="Fehler:$FEHLER"
+    fi
+    entPhysicalName=`echo $entPhysicalName | sed 's/ *$//g'`
+
+    entPhysicalDescr=`$SNMPDIR/snmpget -Onqv $SNMPCFG_SNMPRO  "$1" $SNMPMODULNAME.$SNMPMODINDEX  | tr -d "\""`
+    FEHLER=$?
+    if [[ "$FEHLER" != "0" ]] ; then 
+        entPhysicalDescr="Fehler:$FEHLER"
+    fi
+    entPhysicalDescr=`echo $entPhysicalDescr | sed 's/ *$//g'`
+
+    entPhysicalModelName=`$SNMPDIR/snmpget -Onqv $SNMPCFG_SNMPRO  "$1" $SNMPMODULID.$SNMPMODINDEX  | tr -d "\""`
+    FEHLER=$?
+    if [[ "$FEHLER" != "0" ]] ; then 
+        entPhysicalModelName="Fehler:$FEHLER"
+    fi
+    entPhysicalModelName=`echo $entPhysicalModelName | sed 's/ *$//g'`
+
+    entPhysicalHardwareRev=`$SNMPDIR/snmpget -Onqv $SNMPCFG_SNMPRO  "$1" $SNMPMODULREV.$SNMPMODINDEX  | tr -d "\""`
+    FEHLER=$?
+    if [[ "$FEHLER" != "0" ]] ; then 
+        entPhysicalHardwareRev="Fehler:$FEHLER"
+    fi
+    entPhysicalHardwareRev=`echo $entPhysicalHardwareRev | sed 's/ *$//g'`
+
+    entPhysicalSerialNum=`$SNMPDIR/snmpget -Onqv $SNMPCFG_SNMPRO  "$1" $SNMPMODULSNR.$SNMPMODINDEX  | tr -d "\""`
+    FEHLER=$?
+    if [[ "$FEHLER" != "0" ]] ; then 
+        entPhysicalSerialNum="Fehler:$FEHLER"
+    fi
+    entPhysicalSerialNum=`echo $entPhysicalSerialNum | sed 's/ *$//g'`
+    echo INVENTORY"; "$HOSTNAME"; "$SNMPMODINDEX"; "$SNMPMODTYP"; "$result0"; "$result1"; "$result2"; " >> $TEMPDIR$1-$DATUM.temp2
+    echo INVENTORY"; "$HOSTNAME"; "$entPhysicalName"; "$entPhysicalDescr"; "$entPhysicalModelName"; "$entPhysicalHardwareRev"; "$entPhysicalSerialNum"; "
 done<$TEMPDIR$1-$DATUM.temp1
 }
 
