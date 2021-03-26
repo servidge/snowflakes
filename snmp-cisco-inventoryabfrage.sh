@@ -1,7 +1,8 @@
 #!/bin/bash
-# Idee Umsetzung vom Script von Sebastian Bönning
+# Umsetzung von Sebastian Boenning
+# Part of https://github.com/servidge/snowflakes
 # Abfrage der Eingebauten Module und deren Seriennummern
-VERSION="Version 0.3 vom 2021-03-25 16:00 Uhr"
+VERSION="Version 0.4 vom 2021-03-26 09:00 Uhr"
 
 DATUM=`/bin/date '+%Y%m%d-%H%M%S'`
 DAT=`/bin/date '+%Y-%m-%d'`
@@ -18,10 +19,18 @@ SNMPCOMMUNITYRO=$2
 SNMPTIMEOUTRO=5
 SNMPTIMEOUTRW=15
 
+SNMPHOSTNAME=.1.3.6.1.2.1.1.5.0
+#SNMPv2-SMI::mib-2.47.1.1.1.1.7.1064 = STRING: "TenGigabitEthernet1/0/2"
+SNMPMODULPHYS=.1.3.6.1.2.1.47.1.1.1.1.7
+#SNMPv2-SMI::mib-2.47.1.1.1.1.2.1064 = STRING: "SFP-10GBase-SR"
+SNMPMODULNAME=.1.3.6.1.2.1.47.1.1.1.1.2
+#SNMPv2-SMI::mib-2.47.1.1.1.1.13.1064 = STRING: "SFP-10G-SR-S        "
 SNMPMODULID=.1.3.6.1.2.1.47.1.1.1.1.13
-SNMPMODULNAME=.1.3.6.1.2.1.47.1.1.1.1.2.
-SNMPMODULSNR=.1.3.6.1.2.1.47.1.1.1.1.11.
-#SNMPCFG_SNMPRO="-v 3 -l authPriv -a sha -A authshaPwD -x AES -X privaesPwD -u SNMPUSER-RO"
+#SNMPv2-SMI::mib-2.47.1.1.1.1.8.1064 = STRING: "V01 "
+SNMPMODULREV=.1.3.6.1.2.1.47.1.1.1.1.8
+#SNMPv2-SMI::mib-2.47.1.1.1.1.11.1064 = STRING: "SNR+spaces     "
+SNMPMODULSNR=.1.3.6.1.2.1.47.1.1.1.1.11
+
 
 f_snmp_selekt () {
 #Pfad zum menue
@@ -112,14 +121,31 @@ done<$TEMPDIR$1-$DATUM.temp1
 
 #----------- MAIN Start ------------#
 if [ "$#" -eq 0 ] ; then
-        echo "#"
-        echo "# Keine Parameter angegeben, Aufuf mit $0 <Hostname oder IP > <snmpcommunity>"
-        echo "#"
-        exit 1
+    echo "#"
+    echo "# Keine Parameter angegeben, "
+    echo "# Aufuf mit $0 <Hostname oder IP > "
+    echo "# oder fue mehrere nach vorheriger snmp Profilauswahl mit"
+    echo "# Aufuf mit $0 --batch <Hostname oder IP > <Hostname oder IP > <Hostname oder IP > ..."
+    echo "#"
+    exit 1
 else
+    if [ $1 = "--batch" ]; then
+    . ~/.SNMPCFG
+    shift
+    echo "# Batchabarbeitung der Folgenden Hostnamen oder IPs mit den voreingestellten SNMP Parametern"
+    echo "# Hostnamen oder IPs: $@"
+        for host in "$@"; do 
+            echo "# Abfrage Hostnamen oder IPs: $host"
+            f_snmp_hostname $host
+            f_snmp_modulsuche $host
+            f_snmp_ifstatuslog $host
+        done
+    else
+        echo "# Abfrage Hostnamen oder IPs: $1"
         f_snmp_selekt
         f_snmp_hostname $1
-        f_snmp_ifsuche $1
+        f_snmp_modulsuche $1
         f_snmp_ifstatuslog $1
+    fi
 fi
 exit
