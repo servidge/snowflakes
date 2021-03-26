@@ -1,7 +1,7 @@
 #!/bin/bash
 # Idee Umsetzung vom Script von Sebastian Bönning
 # Abfrage der Eingebauten Module und deren Seriennummern
-VERSION="Version 0.1 vom 2014-03-13 14:00 Uhr"
+VERSION="Version 0.2 vom 2021-03-24 13:30 Uhr"
 
 DATUM=`/bin/date '+%Y%m%d-%H%M%S'`
 DAT=`/bin/date '+%Y-%m-%d'`
@@ -20,13 +20,10 @@ SNMPTIMEOUTRW=15
 SNMPMODULID=.1.3.6.1.2.1.47.1.1.1.1.13
 SNMPMODULNAME=.1.3.6.1.2.1.47.1.1.1.1.2.
 SNMPMODULSNR=.1.3.6.1.2.1.47.1.1.1.1.11.
+SNMPCFG_SNMPRO="-v 3 -l authPriv -a sha -A authshaPwD -x AES -X privaesPwD -u SNMPUSER-RO"
 
 f_snmp_ifsuche () {
-#alle *Ethernet 
-#$SNMPDIR/snmpwalk -Onq -v$SNMPVERSION -c$SNMPCOMMUNITYRO -t$SNMPTIMEOUTRO "$1" $SNMPIFTYP | grep $INTERFACE  | cut -d"." -f12,13,14,15 >$TEMPDIR$1-$DATUM.temp1
-#alle *Ethernet, außer Vlan Sub IF
-#$SNMPDIR/snmpwalk -Onq -v$SNMPVERSION -c$SNMPCOMMUNITYRO -t$SNMPTIMEOUTRO "$1" $SNMPIFTYP | grep $INTERFACE  | cut -d"." -f12,13 | grep -v "\." >$TEMPDIR$1-$DATUM.temp1
-$SNMPDIR/snmpwalk -Onq -v$SNMPVERSION -c$SNMPCOMMUNITYRO -t$SNMPTIMEOUTRO "$1" $SNMPMODULID | cut -d"." -f14,15,16,17 | grep -v '""'>$TEMPDIR$1-$DATUM.temp1
+$SNMPDIR/snmpwalk -Onq $SNMPCFG_SNMPRO "$1" $SNMPMODULID | cut -d"." -f14,15,16,17 | grep -v '""'>$TEMPDIR$1-$DATUM.temp1
 }
 
 f_snmp_ifstatuslog () {
@@ -39,12 +36,12 @@ do
         SNMPMODINDEX=`echo $line | cut -d" " -f1 `
         SNMPMODTYP=`echo $line | cut -d" " -f2 `
         echo "# Prüfe auf $1 $SNMPMODTYP"
-        result0=`$SNMPDIR/snmpget -Onqv -v$SNMPVERSION -c$SNMPCOMMUNITYRO -t$SNMPTIMEOUTRO "$1" $SNMPMODULSNR$SNMPMODINDEX `
+        result0=`$SNMPDIR/snmpget -Onqv $SNMPCFG_SNMPRO  "$1" $SNMPMODULSNR$SNMPMODINDEX `
         FEHLER=$?
         if [[ "$FEHLER" != "0" ]] ; then 
                         result0="Fehler:$FEHLER"
         fi
-        result1=`$SNMPDIR/snmpget -Onqv -v$SNMPVERSION -c$SNMPCOMMUNITYRO -t$SNMPTIMEOUTRO "$1" $SNMPMODULNAME$SNMPMODINDEX `
+        result1=`$SNMPDIR/snmpget -Onqv $SNMPCFG_SNMPRO  "$1" $SNMPMODULNAME$SNMPMODINDEX `
         FEHLER=$?
         if [[ "$FEHLER" != "0" ]] ; then 
                         result0="Fehler:$FEHLER"
