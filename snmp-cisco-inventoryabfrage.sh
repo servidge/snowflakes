@@ -2,7 +2,7 @@
 # Umsetzung von Sebastian Boenning
 # Part of https://github.com/servidge/snowflakes
 # Abfrage der Eingebauten Module und deren Seriennummern
-VERSION="Version 0.4 vom 2021-03-26 14:00 Uhr"
+VERSION="Version 0.5 vom 2021-04-07 11:45 Uhr"
 
 DATUM=`/bin/date '+%Y%m%d-%H%M%S'`
 DAT=`/bin/date '+%Y-%m-%d'`
@@ -43,7 +43,7 @@ else
     echo "# "
     read -r -p "# y oder Enter OK, Alles andere Neuauswah. Auswahl:" key
     if [ "$key" = "y" ] || [ "$key" = "" ]; then
-        #echo "# Ok "
+        echo "# Ok "
     else
         #menue starten
         $SNMPPROFILEENUE
@@ -67,14 +67,13 @@ fi
 
 f_snmp_hostname () {
 snmpcode=""
-HOSTNAME=`$SNMPDIR/snmpget -Onqv $SNMPCFG_SNMPRO "$1" $SNMPHOSTNAME`
-if [[ "$?" == "0" ]] ; then 
+if HOSTNAME=$($SNMPDIR/snmpget -Onqv $SNMPCFG_SNMPRO "$1" $SNMPHOSTNAME 2>&1); then
     #echo "$1 per SNMP Abfragbar"
     snmpcode="0"
     HOSTNAME=`echo $HOSTNAME | cut -d"." -f1 `
 else 
     #echo "$1 per SNMP NICHT Abfragbar!"
-    snmpcode="1"
+    snmpcode=$?
 fi
 }
 
@@ -153,7 +152,7 @@ else
             f_ping_host $host
             if [ "$pingcode" != "0" ] ; then echo "Host $host nicht pingbar" && continue ; fi
             f_snmp_hostname $host
-            if [ "$snmpcode" != "0" ] ; then echo "Host $host nicht per snmp abfragbar" && continue ; fi
+            if [ "$snmpcode" != "0" ] ; then echo "Host $host nicht per snmp abfragbar. Fehler: $HOSTNAME" && continue ; fi
             f_snmp_modulsuche $host
             f_snmp_ifstatuslog $host
         done
@@ -163,7 +162,7 @@ else
         f_ping_host $host
         if [ "$pingcode" != "0" ] ; then echo "Host $host nicht pingbar" && exit ; fi
         f_snmp_hostname $host
-        if [ "$snmpcode" != "0" ] ; then echo "Host $host nicht per snmp abfragbar" && exit ; fi
+        if [ "$snmpcode" != "0" ] ; then echo "Host $host nicht per snmp abfragbar. Fehler: $HOSTNAME" && exit ; fi
         f_snmp_modulsuche $host
         f_snmp_ifstatuslog $host
     fi
