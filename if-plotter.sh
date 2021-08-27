@@ -2,7 +2,7 @@
 # Umsetzung von Sebastian Boenning
 # Part of https://github.com/servidge/snowflakes
 # 
-VERSION="Version 0.0.2 vom 2021-02-19 13:30 Uhr"
+VERSION="Version 0.0.3 vom 2021-08-27 10:30 Uhr"
 SNMPDIR=/usr/bin
 TOOLDIR=/tmp
 DEVICE="$1"
@@ -14,7 +14,7 @@ test -z $DEVICE && echo "# Es fehlt der Geraetename oder IP Adresse, Beispielauf
 SNMPPROFILEENUE=$TOOLDIR/kleinkram/snmp-selektor.sh
 #output des menue als variable laden ob verwendung
 . ~/.SNMPCFG
-if [ -z "$SNMPCFG_SNMPRW" ]; then
+if [ -z "$SNMPCFG_SNMPRO" ]; then
         echo "# kein SNMP Profil vorhanden" 
         #menue starten
         $SNMPPROFILEENUE
@@ -38,7 +38,7 @@ else
 fi
 
 
-SNMPPARAMETERRO=" $SNMPCFG_SNMPRW "
+SNMPPARAMETERRO=" $SNMPCFG_SNMPRO "
 
 echo "#  "       
 echo "# Es folgt gleich eine Abfrage des Interface Index. "
