@@ -1,0 +1,6 @@
+# cisco eem snippets um Kleinkram zu erledigen
+# cisco eem botches to solve trivia problems
+# Part of https://github.com/servidge/snowflakes
+# äöüß
+# 
+# 
