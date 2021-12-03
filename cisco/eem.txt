@@ -3,4 +3,110 @@
 # Part of https://github.com/servidge/snowflakes
 # äöüß
 # 
-# 
+#
+
+! grundsätzlich
+! in general
+EEM-User-in-AAA = User in tacacs/Radius/local
+cron = m h d(month) m d(week)
+
+
+######################################################
+Clear Arp and clear mac address-table dynamic after syslog:
+Nov 28 10:17:41.198 MEZ: %SW_MATM-4-MACFLAP_NOTIF: Host 0030.195b.0aa1 in vlan 45 is flapping between port Fa0/9 and port Fa0/16
+
+no event manager session cli username EEM-User-in-AAA
+event manager session cli username EEM-User-in-AAA
+event manager applet MACflapWATCH authorization bypass
+no event manager applet MACflapWATCH
+event manager applet MACflapWATCH
+ event syslog occurs 2 pattern "%SW_MATM-4-MACFLAP_NOTIF: Host.* is flapping between port.*" period 60
+ action 1.0 cli command "enable"
+ action 2.2 cli command "clear mac address-table dynamic"
+ action 2.3 cli command "clear arp"
+ action 3.2 cli command "clear mac address-table dynamic"
+ action 3.3 cli command "clear arp"
+ action 3.5 cli command "send log MACflapWATCH trigger"
+
+
+######################################################
+Change Traffic shaping Time Based, daily at 6 and 18
+no event manager session cli username EEM-User-in-AAA
+event manager session cli username EEM-User-in-AAA
+event manager applet traffShaping-1 authorization bypass
+no event manager applet traffShaping-1
+event manager applet traffShaping-1
+ event timer cron name traffShaping-1 cron-entry "0 18 * * *"
+ action 10.0 cli command "enable"
+ action 20.0 cli command "send log traffShaping-1-start"
+ action 30.0 cli command "conf t"
+ action 40.0 cli command "interface Fa 0/16"
+ action 40.1 cli command "no service-policy output cos-po1-cust-fa-0-16-50"
+ action 40.2 cli command "service-policy output cos-po1-cust-fa-0-16-100"
+ action 40.3 cli command "bandwidth 100000"
+ action 50.0 cli command "end"
+ action 60.0 cli command "send log traffShaping-1-ende"
+
+event manager applet traffShaping-2 authorization bypass
+no event manager applet traffShaping-2
+event manager applet traffShaping-2
+ event timer cron name traffShaping-2 cron-entry "0 6 * * *"
+ action 10.0 cli command "enable"
+ action 20.0 cli command "send log traffShaping-2-start"
+ action 30.0 cli command "conf t"
+ action 40.0 cli command "interface Fa 0/16"
+ action 40.1 cli command "no service-policy output cos-po1-cust-fa-0-16-100"
+ action 40.2 cli command "service-policy output cos-po1-cust-fa-0-16-50"
+ action 40.3 cli command "bandwidth 50000"
+ action 50.0 cli command "end"
+ action 60.0 cli command "send log traffShaping-2-ende"
+ 
+ 
+######################################################
+IOS Update via copy http2flash via syslog triggerd eem (why waste your own vty.) and delete afterwards the eem.
+
+no event manager session cli username EEM-User-in-AAA
+event manager session cli username EEM-User-in-AAA
+no event manager applet sw-http-copy
+event manager applet sw-http-copy
+event syslog pattern "UPDATEstart" period 1 maxrun 4500
+ action 10.0 cli command "enable"
+ action 20.0 cli command "send log 0 IOS Update per EEM"
+ action 30.0 cli command "copy http://192.0.2.0/ASR920/asr920igp-universalk9.17.06.02.SPA.bin flash:asr920igp-universalk9.17.06.02.SPA.bin"  pattern "asr920igp-universalk9.17.06.02.SPA.bin"
+ action 32.0 cli command "asr920igp-universalk9.17.06.02.SPA.bin"
+ action 80.0 cli command "send log 0 Update per EEM ENDE"
+ action 90.0 cli command "conf t"
+ action 91.0 cli command "no event manager session cli username EEM-User-in-AAA"
+ action 92.0 cli command "no event manager applet sw-http-tftp-test"
+ action 95.0 cli command "do send log 0 Update per EEM Aufraumen ENDE"
+ action 99.0 cli command "exit"
+
+results in the log after "send log UPDATEstart"
+003404: Oct 20 2021 15:11:09.617 MESZ: %SYS-7-USERLOG_DEBUG: Message from tty1(user id: cliuser): UPDATEstart
+003405: Oct 20 2021 15:11:09.999 MESZ: %SYS-0-USERLOG_EMERG: Message from tty2(user id: EEM-User-in-AAA): IOS Update per EEM
+003406: Oct 20 2021 15:18:09.248 MESZ: %SYS-0-USERLOG_EMERG: Message from tty2(user id: EEM-User-in-AAA): Update per EEM ENDE
+003407: Oct 20 2021 15:18:09.927 MESZ: %SYS-0-USERLOG_EMERG: Message from tty2(user id: EEM-User-in-AAA): Update per EEM Aufraumen ENDE
+
+
+######################################################
+IOS Update via copy http2flash via cron based eem (why waste your own vty.) and delete afterwards the eem.
+start at 21:20
+
+no event manager session cli username EEM-User-in-AAA
+event manager session cli username EEM-User-in-AAA
+no event manager applet sw-http-copy
+event manager applet sw-http-copy
+event timer cron name sw-http-copy cron-entry "20 21 * * *" maxrun 4500 
+ action 10.0 cli command "enable"
+ action 20.0 cli command "send log 0 IOS Update per EEM"
+ action 30.0 cli command "copy http://192.0.2.0/ASR920/asr920igp-universalk9.17.06.02.SPA.bin flash:asr920igp-universalk9.17.06.02.SPA.bin"  pattern "asr920igp-universalk9.17.06.02.SPA.bin"
+ action 32.0 cli command "asr920igp-universalk9.17.06.02.SPA.bin"
+ action 80.0 cli command "send log 0 Update per EEM ENDE"
+ action 90.0 cli command "conf t"
+ action 91.0 cli command "no event manager session cli username EEM-User-in-AAA"
+ action 92.0 cli command "no event manager applet sw-http-tftp-test"
+ action 95.0 cli command "do send log 0 Update per EEM Aufraumen ENDE"
+ action 99.0 cli command "exit"
+ 
+
+###################################################### 
